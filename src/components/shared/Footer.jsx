@@ -22,7 +22,7 @@ const Footer = () => {
               <span>RecipeHub</span>
             </Link>
             <p className="text-sm text-neutral-500 max-w-sm leading-relaxed">
-              The world's leading platform for professional culinary management
+              The world&apos;s leading platform for professional culinary management
               and community recipe sharing.
             </p>
           </div>
