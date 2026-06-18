@@ -11,9 +11,12 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-
   const { data: session, isPending } = useSession();
   const user = session?.user;
+
+  if (pathname?.startsWith("/dashboard")) {
+    return null;
+  }
 
   const navigationItems = [
     { label: "Home", href: "/" },

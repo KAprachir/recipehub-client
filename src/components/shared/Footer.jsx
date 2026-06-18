@@ -2,10 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChefHat, Globe, AtSign } from "lucide-react";
 
 const Footer = () => {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  if (pathname?.startsWith("/dashboard")) {
+    return null;
+  }
 
   return (
     <footer className="w-full bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400">

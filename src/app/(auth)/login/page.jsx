@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -27,6 +28,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
       const { data, error } = await authClient.signIn.email({
@@ -37,6 +39,7 @@ export default function LoginPage() {
       // 1. Check if Better Auth returned an invalid credential error
       if (error) {
         console.error("Login error from Better Auth:", error.message);
+        setError(error.message || "Invalid email or password. Please try again.");
         // Stop execution here so they stay on the login page
         return;
       }
@@ -47,6 +50,7 @@ export default function LoginPage() {
     } catch (err) {
       // 3. Catch unexpected network errors or crashes
       console.error("Authentication login failure:", err);
+      setError("An unexpected connection error occurred. Please try again.");
     } finally {
       // 4. Turn off loading state regardless of outcome
       setIsLoading(false);
@@ -68,9 +72,14 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Main Login Centered Form Container Card */}
       <div className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-3xl shadow-xl border border-neutral-100/50 dark:border-neutral-800/50 p-6 md:p-8 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
           {/* Email Address Input */}
           <div className="space-y-1">
             <label className="text-xs font-semibold text-neutral-600 dark:text-neutral-400">

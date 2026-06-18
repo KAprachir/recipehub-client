@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 export default function RegisterPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -40,7 +41,12 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!hasMinLength || !hasCaseMix) return;
+    setError("");
+
+    if (!hasMinLength || !hasCaseMix) {
+      setError("Password must meet all requirements.");
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -53,13 +59,15 @@ export default function RegisterPage() {
 
       if (error) {
         console.error("Registration error from Better Auth:", error.message);
+        setError(error.message || "Failed to create account. Please try again.");
         return;
       }
 
       router.push("/");
       router.refresh();
-    } catch (error) {
-      console.error("Authentication registration failure:", error);
+    } catch (err) {
+      console.error("Authentication registration failure:", err);
+      setError("An unexpected connection error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -103,6 +111,12 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-lg flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
               {/* Full Name Input */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
