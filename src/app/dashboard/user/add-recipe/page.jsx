@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import Swal from "sweetalert2";
+import { createRecipe } from "@/lib/actions/recipes";
 
 const CATEGORIES = [
   "Main Course",
@@ -139,10 +140,10 @@ export default function AddRecipePage() {
       console.log(recipePayload);
 
       // 3. Post to backend router (Simulated)
-      // const response = await axiosSecure.post("/recipes", recipePayload);
-      const response = { data: { insertedId: "123" } }; // Mocking response for demo
+      const response = await createRecipe(recipePayload);
+      console.log(response);
 
-      if (response.data.insertedId) {
+      if (response.insertedId) {
         Swal.fire("Success 🎉", "Recipe published successfully!", "success");
         setRecipeName("");
         setCategory(null);
