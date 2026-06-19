@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@heroui/react";
 import { Mail, Lock, LogIn, ChefHat } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { createAuthClient } from "better-auth/client";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +25,14 @@ export default function LoginPage() {
     }));
   };
 
+  // google signIn
+  const authClient = createAuthClient();
+  const googleSignIn = async () => {
+    const data = await authClient.signIn.social({
+      provider: "google",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,7 +47,9 @@ export default function LoginPage() {
       // 1. Check if Better Auth returned an invalid credential error
       if (error) {
         console.error("Login error from Better Auth:", error.message);
-        setError(error.message || "Invalid email or password. Please try again.");
+        setError(
+          error.message || "Invalid email or password. Please try again.",
+        );
         // Stop execution here so they stay on the login page
         return;
       }
@@ -168,11 +178,7 @@ export default function LoginPage() {
         <Button
           variant="bordered"
           className="w-full border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold h-11 rounded-xl bg-transparent text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          onPress={() =>
-            console.log(
-              "Google Provider Authentication Strategy Triggered via Better-Auth",
-            )
-          }
+          onPress={() => googleSignIn()}
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path

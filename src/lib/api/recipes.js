@@ -26,3 +26,7 @@ export const getRecipes = async filters => {
 export const getRecipeById = async id => {
   return serverFetch(`/api/recipes/${id}`)
 }
+
+export async function getAdminRecipesData () {
+  return await serverFetch('/api/admin/recipes-summary')
+}
