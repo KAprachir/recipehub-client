@@ -43,7 +43,6 @@ export default function FilterSidebar({ currentFilters }) {
     setMaxTime(currentFilters.maxTime || 60);
   }, [currentFilters]);
 
-  // URL 업데이트 করার লজিক ফাংশন
   const updateQueryParams = (key, value) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {

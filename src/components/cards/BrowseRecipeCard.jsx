@@ -59,15 +59,15 @@ export default function BrowseRecipeCard({ recipe }) {
               </span>
             </div>
 
-            <Button
-              as={Link}
-              href={`/recipes/${recipe._id}`}
-              size="sm"
-              radius="md"
-              className="bg-[#10B981] hover:bg-[#059669] text-white font-bold px-4"
-            >
-              View Details
-            </Button>
+            <Link href={`/recipes/${recipe._id}`}>
+              <Button
+                size="sm"
+                radius="md"
+                className="bg-[#10B981] hover:bg-[#059669] text-white font-bold px-4"
+              >
+                View Details
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>

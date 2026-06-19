@@ -17,6 +17,8 @@ import {
   Send,
   FileText,
   AlertTriangle,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import Swal from "sweetalert2";
@@ -50,8 +52,10 @@ export default function AddRecipePage() {
   const [cuisine, setCuisine] = useState(null); // Updated: v3 uses null/string instead of Set
   const [difficulty, setDifficulty] = useState("Medium");
   const [prepTime, setPrepTime] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [instructions, setInstructions] = useState("");
+  const [ingredients, setIngredients] = useState([]);
+  const [newIngredient, setNewIngredient] = useState("");
+  const [instructions, setInstructions] = useState([]);
+  const [newInstruction, setNewInstruction] = useState("");
 
   // Image Upload States
   const [imageFile, setImageFile] = useState(null);
@@ -59,9 +63,43 @@ export default function AddRecipePage() {
   const [isUploading, setIsUploading] = useState(false);
 
   // Options States
-  const [publishToFeed, setPublishToFeed] = useState(true);
-  const [allowComments, setAllowComments] = useState(false);
-  const [notifyFollowers, setNotifyFollowers] = useState(true);
+  const [visibility, setVisibility] = useState(true);
+
+  const handleAddIngredient = () => {
+    if (newIngredient.trim()) {
+      setIngredients([...ingredients, newIngredient.trim()]);
+      setNewIngredient("");
+    }
+  };
+
+  const handleRemoveIngredient = (indexToRemove) => {
+    setIngredients(ingredients.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleIngredientKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddIngredient();
+    }
+  };
+
+  const handleAddInstruction = () => {
+    if (newInstruction.trim()) {
+      setInstructions([...instructions, newInstruction.trim()]);
+      setNewInstruction("");
+    }
+  };
+
+  const handleRemoveInstruction = (indexToRemove) => {
+    setInstructions(instructions.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleInstructionKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAddInstruction();
+    }
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -80,8 +118,8 @@ export default function AddRecipePage() {
       !category ||
       !cuisine ||
       !prepTime ||
-      !ingredients ||
-      !instructions
+      ingredients.length === 0 ||
+      instructions.length === 0
     ) {
       Swal.fire("Error", "Please fill in all required fields.", "error");
       return;
@@ -122,9 +160,7 @@ export default function AddRecipePage() {
         cuisineType: cuisine, // Updated: Pass value directly
         difficultyLevel: difficulty,
         preparationTime: parseInt(prepTime),
-        ingredients: ingredients
-          .split("\n")
-          .filter((line) => line.trim() !== ""),
+        ingredients: ingredients,
         instructions: instructions,
         authorId: user?.id,
         authorName: user?.name,
@@ -132,7 +168,12 @@ export default function AddRecipePage() {
         likesCount: 0,
         isFeatured: false,
         status: "active",
-        options: { publishToFeed, allowComments, notifyFollowers },
+        visibility: visibility,
+        options: {
+          publishToFeed: visibility,
+          allowComments: true,
+          notifyFollowers: visibility,
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -149,10 +190,13 @@ export default function AddRecipePage() {
         setCategory(null);
         setCuisine(null);
         setPrepTime("");
-        setIngredients("");
-        setInstructions("");
+        setIngredients([]);
+        setNewIngredient("");
+        setInstructions([]);
+        setNewInstruction("");
         setImageFile(null);
         setImagePreview(null);
+        setVisibility(true);
       }
     } catch (error) {
       console.error(error);
@@ -300,46 +344,128 @@ export default function AddRecipePage() {
           </Card>
 
           {/* Card 2: Ingredients */}
-          <Card className="shadow-sm border border-zinc-200/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-6 space-y-3">
+          <Card className="shadow-sm border border-zinc-200/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-900 pb-3">
               <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-500 font-bold">
                 <ListPlus size={18} /> <span>Ingredients</span>
               </div>
-              <button
-                type="button"
-                className="text-xs text-emerald-600 font-bold hover:underline"
-              >
-                + Add Section
-              </button>
             </div>
 
-            <TextArea
-              variant="bordered"
-              minrows={4}
-              placeholder="Enter each ingredient on a new line (e.g., 200g Arborio Rice)"
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
-              isrequired="true"
-            />
+            <div className="flex gap-2 items-center">
+              <Input
+                type="text"
+                placeholder="e.g., 200g Arborio Rice"
+                variant="bordered"
+                value={newIngredient}
+                onChange={(e) => setNewIngredient(e.target.value)}
+                onKeyDown={handleIngredientKeyDown}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                color="success"
+                onClick={handleAddIngredient}
+                isIconOnly
+                className="h-10 w-10 min-w-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+              >
+                <Plus size={18} />
+              </Button>
+            </div>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              {ingredients.length === 0 ? (
+                <div className="text-center py-6 text-zinc-400 text-xs border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+                  No ingredients added yet. Type an ingredient above and press
+                  Enter.
+                </div>
+              ) : (
+                ingredients.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 transition-all hover:bg-zinc-100/70 dark:hover:bg-zinc-900/80"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        {item}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveIngredient(idx)}
+                      className="text-zinc-400 hover:text-red-500 transition-colors p-1"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
             <p className="text-[11px] text-zinc-400 italic">
-              Pro tip: Use bold text for main components.
+              Pro tip: List ingredients in the order they are used.
             </p>
           </Card>
 
           {/* Card 3: Instructions */}
-          <Card className="shadow-sm border border-zinc-200/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-6 space-y-3">
+          <Card className="shadow-sm border border-zinc-200/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 p-6 space-y-4">
             <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-500 font-bold border-b border-zinc-100 dark:border-zinc-900 pb-3">
-              <FileText size={18} /> <span>Instructions</span>
+              <FileText size={18} /> <span>Instructions (Step-by-Step)</span>
             </div>
 
-            <TextArea
-              variant="bordered"
-              minrows={6}
-              placeholder="Describe the steps in detail. Be precise about temperatures and timing."
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              isrequired="true"
-            />
+            <div className="flex gap-2 items-end">
+              <TextArea
+                variant="bordered"
+                minrows={2}
+                placeholder="Describe this step (e.g., Heat olive oil, sauté minced garlic...)"
+                value={newInstruction}
+                onChange={(e) => setNewInstruction(e.target.value)}
+                onKeyDown={handleInstructionKeyDown}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                color="success"
+                onClick={handleAddInstruction}
+                isIconOnly
+                className="h-10 w-10 min-w-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs mb-1"
+              >
+                <Plus size={18} />
+              </Button>
+            </div>
+
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 pt-2">
+              {instructions.length === 0 ? (
+                <div className="text-center py-8 text-zinc-400 text-xs border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+                  No steps added yet. Describe your first step above and click
+                  "Add Step".
+                </div>
+              ) : (
+                instructions.map((step, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start justify-between p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 transition-all hover:bg-zinc-100/70 dark:hover:bg-zinc-900/80 gap-3"
+                  >
+                    <div className="flex items-start gap-3 flex-1">
+                      <span className="text-[10px] font-black bg-[#00693E] text-white w-6 h-6 rounded-full flex items-center justify-center shrink-0 shadow-xs">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 whitespace-pre-line leading-relaxed pt-0.5">
+                        {step}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveInstruction(idx)}
+                      className="text-zinc-400 hover:text-red-500 transition-colors p-1 shrink-0"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </Card>
         </div>
 
@@ -395,34 +521,39 @@ export default function AddRecipePage() {
               Visibility & Options
             </p>
 
-            <div className="flex flex-col space-y-3">
-              <Checkbox
-                color="success"
-                isSelected={publishToFeed}
-                onValueChange={setPublishToFeed}
-              >
-                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Publish to public feed
-                </span>
-              </Checkbox>
-              <Checkbox
-                color="success"
-                isSelected={allowComments}
-                onValueChange={setAllowComments}
-              >
-                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Allow comments
-                </span>
-              </Checkbox>
-              <Checkbox
-                color="success"
-                isSelected={notifyFollowers}
-                onValueChange={setNotifyFollowers}
-              >
-                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Notify my followers
-                </span>
-              </Checkbox>
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-zinc-500">
+                Recipe Visibility
+              </label>
+              <div className="flex gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl w-full">
+                <button
+                  type="button"
+                  onClick={() => setVisibility(true)}
+                  className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                    visibility === true
+                      ? "bg-[#10B981] text-white shadow-sm"
+                      : "hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                  }`}
+                >
+                  Public
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibility(false)}
+                  className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                    visibility === false
+                      ? "bg-[#10B981] text-white shadow-sm"
+                      : "hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                  }`}
+                >
+                  Private
+                </button>
+              </div>
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 italic leading-relaxed">
+                {visibility
+                  ? "💡 Anyone can search for, view, and cook this recipe."
+                  : "🔒 This recipe will only be visible to you in your profile dashboard."}
+              </p>
             </div>
           </Card>
 

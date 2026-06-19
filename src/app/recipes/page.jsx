@@ -43,8 +43,7 @@ export default async function RecipesPage(props) {
                 Browse All Recipes
               </h1>
               <p className="text-xs text-zinc-400 mt-1">
-                Discover over {totalCount ?? 0} professional culinary
-                creations.
+                Discover over {totalCount ?? 0} professional culinary creations.
               </p>
             </div>
 
@@ -80,4 +79,3 @@ export default async function RecipesPage(props) {
     </div>
   );
 }
-

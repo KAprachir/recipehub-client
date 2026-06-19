@@ -1,7 +1,14 @@
-import React from "react";
+import { getUserSession } from "@/lib/core/session";
+import { redirect } from "next/navigation";
+import ProfileClient from "@/components/profile/ProfileClient";
 
-const ProfilePage = () => {
-  return <div></div>;
-};
+export default async function ProfilePage() {
+  const user = await getUserSession();
 
-export default ProfilePage;
+  // ইউজার সিকিউরিটি চেক
+  if (!user) {
+    redirect("/login");
+  }
+
+  return <ProfileClient user={user} />;
+}

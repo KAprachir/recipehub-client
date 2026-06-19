@@ -1,3 +1,5 @@
+import { serverFetch } from '../core/server'
+
 export const getRecipes = async filters => {
   const { page, category, cuisine, difficulty, maxTime, sortBy } = filters
 
@@ -17,4 +19,10 @@ export const getRecipes = async filters => {
   })
 
   return res.json() // এটি সরাসরি { recipes, totalCount } রিটার্ন করবে
+}
+
+// recipe by id
+
+export const getRecipeById = async id => {
+  return serverFetch(`/api/recipes/${id}`)
 }
