@@ -11,6 +11,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import { deleteRecipe } from "@/lib/actions/recipes";
 
 export default function RecipeManagementClient({ summaryData }) {
   const [recipes, setRecipes] = useState(summaryData?.recipes || []);
@@ -66,7 +67,7 @@ export default function RecipeManagementClient({ summaryData }) {
       if (result.isConfirmed) {
         try {
           // ব্যাকএন্ড ডিলিট API কল করার জায়গা
-          // await fetch(`/api/admin/recipes/${recipeId}`, { method: 'DELETE' });
+          await deleteRecipe(recipeId);
 
           setRecipes((prev) => prev.filter((rec) => rec._id !== recipeId));
           Swal.fire("Deleted!", "Recipe has been safely removed.", "success");

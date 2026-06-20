@@ -6,7 +6,6 @@ import { getAdminRecipesData } from "@/lib/api/recipes";
 
 export default async function RecipeManagementPage() {
   const summaryData = await getAdminRecipesData();
-  console.log(summaryData);
 
   return (
     <div className="space-y-6 p-2 text-zinc-800 dark:text-zinc-200">
