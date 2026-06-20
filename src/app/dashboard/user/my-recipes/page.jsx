@@ -4,9 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, Input, Button } from "@heroui/react";
 import { motion } from "framer-motion";
-// 💡 BACKEND CALL: Import the query/mutation helpers once you define them inside lib/api and lib/actions:
-// import { getUserRecipes } from "@/lib/api/recipes";
-// import { deleteRecipe } from "@/lib/actions/recipes";
+import { getUserRecipes } from "@/lib/api/recipes";
+import { deleteRecipe } from "@/lib/actions/recipes";
 import {
   Plus,
   Edit2,
@@ -25,57 +24,27 @@ export default function MyRecipesPage() {
   // Hook up your backend API call to fetch user-specific recipes.
   // 1. Uncomment the getUserRecipes import at the top of this file.
   // 2. Replace the local mock data inside try {} with:
-  //    const data = await getUserRecipes();
-  //    setRecipes(data);
+  //
   useEffect(() => {
     const fetchUserRecipes = async () => {
       try {
         setLoading(true);
-        // Replace with actual API endpoint:
-        // const data = await serverFetch('/api/my-recipes');
-        // setRecipes(data);
-
-        // --- Mock Data Placeholder (Remove this block when connecting API) ---
-        const mockData = [
-          {
-            id: 1,
-            name: "Pan-Seared Sea Bass",
-            category: "Seafood",
-            badge: "Featured",
-            badgeColor: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50",
-            image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
-            timeAgo: "Updated 2 days ago",
-            status: "Published",
-            statusColor: "bg-emerald-500",
-            likesCount: 1200,
-          },
-          {
-            id: 2,
-            name: "Hand-Pulled Papparde",
-            category: "Pasta",
-            badge: "Draft",
-            badgeColor: "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700",
-            image: "https://images.unsplash.com/photo-1554978991-33ef7f31d658?auto=format&fit=crop&w=600&q=80",
-            timeAgo: "Last edit 4h ago",
-            status: "Drafting",
-            statusColor: "bg-zinc-400",
-            likesCount: 0,
-          },
-          {
-            id: 3,
-            name: "Wild Berry Pavlova",
-            category: "Dessert",
-            badge: "Active",
-            badgeColor: "bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-900/50",
-            image: "https://images.unsplash.com/photo-1511018556340-d16986a1c194?auto=format&fit=crop&w=600&q=80",
-            timeAgo: "Published 1 week ago",
-            status: "Published",
-            statusColor: "bg-emerald-500",
-            likesCount: 450,
-          },
-        ];
-        setRecipes(mockData);
-        // --------------------------------------------------------------------
+        const data = await getUserRecipes();
+        const mappedRecipes = (data || []).map((recipe) => ({
+          id: recipe._id,
+          name: recipe.recipeName,
+          category: recipe.category,
+          badge: recipe.isFeatured ? "Featured" : "Active",
+          badgeColor: recipe.isFeatured
+            ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50"
+            : "bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-900/50",
+          image: recipe.recipeImage,
+          timeAgo: recipe.createdAt ? `Created ${new Date(recipe.createdAt).toLocaleDateString()}` : "Recently updated",
+          status: recipe.status === "active" ? "Published" : "Draft",
+          statusColor: recipe.status === "active" ? "bg-emerald-500" : "bg-zinc-400",
+          likesCount: recipe.likesCount || 0,
+        }));
+        setRecipes(mappedRecipes);
       } catch (error) {
         console.error("Failed to fetch recipes:", error);
       } finally {
@@ -103,28 +72,34 @@ export default function MyRecipesPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // TODO: Call your action:
-          // await deleteRecipe(recipeId);
-          
+          // Call your action:
+          await deleteRecipe(recipeId);
+
           // Remove from local state:
           setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
-          
+
           Swal.fire("Deleted!", "Your recipe has been deleted.", "success");
         } catch (error) {
-          Swal.fire("Error", "Failed to delete recipe. Please try again.", "error");
+          Swal.fire(
+            "Error",
+            "Failed to delete recipe. Please try again.",
+            "error",
+          );
         }
       }
     });
   };
 
-
   // 💡 SERVER INTEGRATION STEP 5:
   // Compute metric numbers dynamically from your fetched database state.
   const totalPublished = recipes.filter((r) => r.status === "Published").length;
   const totalDrafts = recipes.filter((r) => r.status === "Drafting").length;
-  
+
   // Summing up total likes/saves to show total culinary impact
-  const totalSaves = recipes.reduce((acc, curr) => acc + (curr.likesCount || 0), 0);
+  const totalSaves = recipes.reduce(
+    (acc, curr) => acc + (curr.likesCount || 0),
+    0,
+  );
   // Calculate relative progress bar width based on goals (e.g. out of 2k saves goal)
   const progressPercentage = Math.min((totalSaves / 2000) * 100, 100);
 
@@ -141,7 +116,11 @@ export default function MyRecipesPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
   };
 
   return (
@@ -181,7 +160,11 @@ export default function MyRecipesPage() {
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {/* Total Recipes Published */}
-          <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+          >
             <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between relative overflow-hidden h-full">
               <div className="flex items-center justify-between">
                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-[#046A38] dark:text-emerald-400 rounded-xl">
@@ -204,7 +187,11 @@ export default function MyRecipesPage() {
           </motion.div>
 
           {/* Drafts */}
-          <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+          >
             <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between relative overflow-hidden h-full">
               <div className="flex items-center justify-between">
                 <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 dark:text-amber-400 rounded-xl">
@@ -227,7 +214,11 @@ export default function MyRecipesPage() {
           </motion.div>
 
           {/* Culinary Impact */}
-          <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+          <motion.div
+            variants={itemVariants}
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+          >
             <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between relative overflow-hidden h-full">
               <div className="absolute right-4 bottom-4 text-zinc-100 dark:text-zinc-900 pointer-events-none opacity-30">
                 <UtensilsCrossed size={72} className="stroke-[1.5]" />
@@ -238,24 +229,25 @@ export default function MyRecipesPage() {
                 </p>
                 {/* 💡 DYNAMIC VALUE LINKED: totalSaves */}
                 <p className="text-base font-bold text-zinc-900 dark:text-white mt-1.5">
-                  {loading ? "Calculating..." : `${(totalSaves / 1000).toFixed(1)}k Saves this month`}
+                  {loading
+                    ? "Calculating..."
+                    : `${(totalSaves / 1000).toFixed(1)}k Saves this month`}
                 </p>
               </div>
               <div className="mt-6 space-y-1 z-10">
                 <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
                   {/* 💡 DYNAMIC WIDTH LINKED: progressPercentage */}
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: loading ? 0 : `${progressPercentage}%` }}
                     transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
-                    className="bg-[#046A38] h-full rounded-full" 
+                    className="bg-[#046A38] h-full rounded-full"
                   />
                 </div>
               </div>
             </Card>
           </motion.div>
         </motion.div>
-
 
         {/* ─── RECIPES CARD GRID ─── */}
         {loading ? (
@@ -283,7 +275,9 @@ export default function MyRecipesPage() {
                       alt={recipe.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <span className={`absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${recipe.badgeColor}`}>
+                    <span
+                      className={`absolute top-3 left-3 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${recipe.badgeColor}`}
+                    >
                       {recipe.badge}
                     </span>
                   </div>
@@ -305,7 +299,9 @@ export default function MyRecipesPage() {
                     {/* Footer Controls */}
                     <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-900/60 mt-auto">
                       <div className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${recipe.statusColor}`} />
+                        <span
+                          className={`w-2 h-2 rounded-full ${recipe.statusColor}`}
+                        />
                         <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400">
                           {recipe.status}
                         </span>
@@ -322,12 +318,14 @@ export default function MyRecipesPage() {
                         >
                           <Edit2 size={13} />
                         </Link>
-                        
+
                         {/* 💡 SERVER INTEGRATION STEP 7: 
                             Triggers sweetalert deletion modal confirmation and executes handleDeleteRecipe()
                         */}
                         <button
-                          onClick={() => handleDeleteRecipe(recipe.id, recipe.name)}
+                          onClick={() =>
+                            handleDeleteRecipe(recipe.id, recipe.name)
+                          }
                           className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors cursor-pointer"
                           title="Delete Recipe"
                         >
@@ -347,7 +345,10 @@ export default function MyRecipesPage() {
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="h-full"
             >
-              <Link href="/dashboard/user/add-recipe" className="block h-full cursor-pointer">
+              <Link
+                href="/dashboard/user/add-recipe"
+                className="block h-full cursor-pointer"
+              >
                 <div className="h-full border-2 border-dashed border-zinc-300 dark:border-zinc-800 hover:border-[#046A38] dark:hover:border-emerald-500 bg-zinc-50/50 dark:bg-zinc-950/20 hover:bg-zinc-50 dark:hover:bg-zinc-950/60 rounded-2xl flex flex-col items-center justify-center p-6 text-center transition-all duration-300 min-h-[300px] group shadow-2xs">
                   <div className="p-3 bg-white dark:bg-zinc-950 rounded-full shadow-sm text-zinc-400 group-hover:text-[#046A38] dark:group-hover:text-emerald-400 transition-colors mb-3">
                     <Plus size={20} className="stroke-[2.5]" />
@@ -375,20 +376,33 @@ export default function MyRecipesPage() {
             RecipeHub
           </p>
           <p className="text-[10px] text-zinc-400 font-medium">
-            &copy; 2024 RecipeHub Professional Culinary Systems. All rights reserved.
+            &copy; 2024 RecipeHub Professional Culinary Systems. All rights
+            reserved.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             About Us
           </Link>
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             Privacy Policy
           </Link>
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             Terms of Service
           </Link>
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             Contact Support
           </Link>
         </div>

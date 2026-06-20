@@ -32,8 +32,7 @@ export const getRecipeById = async id => {
 // 1. Get user-specific recipes created by the active logged-in user.
 // Hint: You should call serverFetch with the path '/api/user/my-recipes' and disable cache.
 export const getUserRecipes = async () => {
-  // TODO: Uncomment and use this:
-  // return serverFetch('/api/user/my-recipes', { cache: 'no-store' })
+  return serverFetch('/api/user/my-recipes', { cache: 'no-store' })
 }
 
 // 2. Get premium recipes purchased/unlocked by the active logged-in user.

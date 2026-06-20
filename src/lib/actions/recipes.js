@@ -12,8 +12,7 @@ export const createRecipe = async newRecipeData => {
 // 1. Delete user's own recipe.
 // Hint: Trigger a DELETE request to '/api/recipes/:id'.
 export const deleteRecipe = async id => {
-  // TODO: Uncomment and use this:
-  // return serverMutation(`/api/recipes/${id}`, {}, 'DELETE')
+  return serverMutation(`/api/recipes/${id}`, {}, 'DELETE')
 }
 
 // 2. Toggle favorite status (adds or removes a recipe from the user's favorites).
