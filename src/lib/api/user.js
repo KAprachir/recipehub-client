@@ -20,5 +20,5 @@ export const getUserDashboardSummary = async () => {
 // Hint: Point to '/api/user/favorites' and disable cache.
 export const getUserFavorites = async () => {
   // TODO: Uncomment and use this:
-  // return serverFetch('/api/user/favorites', { cache: 'no-store' })
+  return serverFetch('/api/user/favorites', { cache: 'no-store' })
 }

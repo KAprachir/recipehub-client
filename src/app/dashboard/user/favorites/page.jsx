@@ -4,9 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, Avatar, Input, Button } from "@heroui/react";
 import { motion } from "framer-motion";
-// 💡 BACKEND CALL: Import the query/mutation helpers once you define them inside lib/api and lib/actions:
-// import { getUserFavorites } from "@/lib/api/user";
-// import { toggleFavoriteRecipe } from "@/lib/actions/recipes";
+import { getUserFavorites } from "@/lib/api/user";
+import { toggleFavoriteRecipe } from "@/lib/actions/recipes";
 import {
   Search,
   Heart,
@@ -19,57 +18,12 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 💡 BACKEND CALL:
-  // Hook up your backend API call to fetch user favorites.
-  // 1. Uncomment the getUserFavorites import at the top of this file.
-  // 2. Replace the local mock data inside try {} with:
-  //    const data = await getUserFavorites();
-  //    setFavorites(data);
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
         setLoading(true);
-        // Replace with actual API endpoint:
-        // const data = await serverFetch('/api/favorites');
-        // setFavorites(data);
-
-        // --- Mock Data Placeholder (Remove this block when connecting API) ---
-        const mockData = [
-          {
-            id: 1,
-            name: "Pan-Seared Duck Breast",
-            category: "Fine Dining",
-            image: "https://images.unsplash.com/photo-1514944224746-6bba5b09e5c2?auto=format&fit=crop&w=600&q=80",
-            chefName: "Chef Marcus V.",
-            chefAvatar: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=100&q=80",
-          },
-          {
-            id: 2,
-            name: "Deconstructed Lemon Tart",
-            category: "Pastry",
-            image: "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80",
-            chefName: "Chef Elena R.",
-            chefAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80",
-          },
-          {
-            id: 3,
-            name: "Truffle Wagyu Beef",
-            category: "Main Course",
-            image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80",
-            chefName: "Chef Julian K.",
-            chefAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80",
-          },
-          {
-            id: 4,
-            name: "Signature Ahi Tuna Poke",
-            category: "Health Focus",
-            image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
-            chefName: "Chef Sarah L.",
-            chefAvatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80",
-          },
-        ];
-        setFavorites(mockData);
-        // --------------------------------------------------------------------
+        const data = await getUserFavorites();
+        setFavorites(data || []);
       } catch (error) {
         console.error("Failed to fetch favorites:", error);
       } finally {
@@ -80,11 +34,6 @@ export default function FavoritesPage() {
     fetchFavorites();
   }, []);
 
-  // 💡 BACKEND CALL:
-  // Toggle favorite / Remove from favorites list.
-  // 1. Uncomment the toggleFavoriteRecipe import at the top of this file.
-  // 2. Inside the try block below, call:
-  //    await toggleFavoriteRecipe(recipeId);
   const handleRemoveFavorite = async (recipeId, recipeName) => {
     Swal.fire({
       title: "Remove from Favorites?",
@@ -97,11 +46,10 @@ export default function FavoritesPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // TODO: Call your action:
-          // await toggleFavoriteRecipe(recipeId);
+          await toggleFavoriteRecipe(recipeId);
           
           // Update local state:
-          setFavorites((prev) => prev.filter((r) => r.id !== recipeId));
+          setFavorites((prev) => prev.filter((r) => (r._id || r.id) !== recipeId));
           
           Swal.fire("Removed!", "Recipe removed from favorites.", "success");
         } catch (error) {
@@ -112,10 +60,14 @@ export default function FavoritesPage() {
   };
 
   // Client-side search helper. 
-  const filteredFavorites = favorites.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredFavorites = favorites.filter((recipe) => {
+    const name = recipe.recipeName || recipe.name || "";
+    const category = recipe.category || "";
+    return (
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   // Animation variants for container cascading
   const containerVariants = {
@@ -184,67 +136,74 @@ export default function FavoritesPage() {
             variants={containerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {filteredFavorites.map((recipe) => (
-              <motion.div
-                key={recipe.id}
-                variants={itemVariants}
-                whileHover={{ y: -6, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="h-full"
-              >
-                {/* 💡 SERVER INTEGRATION STEP 4:
-                    Link this card to the details page of the recipe.
-                    Example: href={`/recipes/${recipe.recipeId || recipe._id}`}
-                */}
-                <Card className="shadow-sm border border-zinc-200/50 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 overflow-hidden rounded-2xl flex flex-col h-full group hover:shadow-md transition-shadow duration-300">
-                  
-                  {/* Image & Favorite Toggle Button */}
-                  <div className="relative h-44 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shrink-0">
-                    <img
-                      src={recipe.image}
-                      alt={recipe.name}
-                      className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
-                    />
-                    
-                    {/* Active Heart button matching mockup */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault(); // Prevents card link navigation
-                        handleRemoveFavorite(recipe.id, recipe.name);
-                      }}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white dark:bg-zinc-900/90 dark:hover:bg-zinc-900 flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer text-emerald-500 dark:text-emerald-400"
-                      title="Remove from favorites"
-                    >
-                      <Heart size={15} fill="currentColor" className="stroke-[2.5]" />
-                    </button>
-                  </div>
+            {filteredFavorites.map((recipe) => {
+              const recipeId = recipe._id || recipe.id;
+              const recipeName = recipe.recipeName || recipe.name || "Untitled Recipe";
+              const recipeImage = recipe.recipeImage || recipe.image || "";
+              const chefName = recipe.authorName || recipe.chefName || "Anonymous Chef";
+              const chefAvatar = recipe.authorImage || recipe.chefAvatar || "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=100&q=80";
 
-                  {/* Body Content */}
-                  <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-[#046A38] dark:text-emerald-500 uppercase tracking-wider">
-                        {recipe.category}
-                      </span>
-                      <h3 className="text-sm font-black text-zinc-950 dark:text-white tracking-tight leading-snug group-hover:text-[#046A38] dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
-                        {recipe.name}
-                      </h3>
-                    </div>
+              return (
+                <motion.div
+                  key={recipeId}
+                  variants={itemVariants}
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="h-full"
+                >
+                  <Link href={`/recipes/${recipeId}`} className="block h-full">
+                    <Card className="shadow-sm border border-zinc-200/50 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 overflow-hidden rounded-2xl flex flex-col h-full group hover:shadow-md transition-shadow duration-300">
+                      
+                      {/* Image & Favorite Toggle Button */}
+                      <div className="relative h-44 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shrink-0">
+                        <img
+                          src={recipeImage}
+                          alt={recipeName}
+                          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                        />
+                        
+                        {/* Active Heart button matching mockup */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault(); // Prevents card link navigation
+                            e.stopPropagation();
+                            handleRemoveFavorite(recipeId, recipeName);
+                          }}
+                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white dark:bg-zinc-900/90 dark:hover:bg-zinc-900 flex items-center justify-center shadow-md transition-all hover:scale-110 cursor-pointer text-emerald-500 dark:text-emerald-400"
+                          title="Remove from favorites"
+                        >
+                          <Heart size={15} fill="currentColor" className="stroke-[2.5]" />
+                        </button>
+                      </div>
 
-                    {/* Author block matching mockup */}
-                    <div className="flex items-center gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-900/60 mt-auto">
-                      <Avatar
-                        src={recipe.chefAvatar}
-                        className="w-6 h-6 ring-1 ring-zinc-200 dark:ring-zinc-800"
-                        size="sm"
-                      />
-                      <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400">
-                        {recipe.chefName}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
+                      {/* Body Content */}
+                      <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-bold text-[#046A38] dark:text-emerald-500 uppercase tracking-wider">
+                            {recipe.category}
+                          </span>
+                          <h3 className="text-sm font-black text-zinc-950 dark:text-white tracking-tight leading-snug group-hover:text-[#046A38] dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                            {recipeName}
+                          </h3>
+                        </div>
+
+                        {/* Author block matching mockup */}
+                        <div className="flex items-center gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-900/60 mt-auto">
+                          <Avatar
+                            src={chefAvatar}
+                            className="w-6 h-6 ring-1 ring-zinc-200 dark:ring-zinc-800"
+                            size="sm"
+                          />
+                          <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400">
+                            {chefName}
+                          </span>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </motion.div>
         )}
       </div>

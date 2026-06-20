@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Button, Avatar } from "@heroui/react";
 import {
   Clock,
@@ -16,10 +16,73 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useAuth } from "@/hooks/useAuth";
+import { getUserFavorites } from "@/lib/api/user";
+import { toggleFavoriteRecipe } from "@/lib/actions/recipes";
 
 export default function RecipeDetailsClient({ recipe }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && recipe?._id) {
+      const loadFavoriteStatus = async () => {
+        try {
+          const favorites = await getUserFavorites();
+          if (Array.isArray(favorites)) {
+            const isFav = favorites.some((fav) => fav._id === recipe._id);
+            setIsFavorited(isFav);
+          }
+        } catch (error) {
+          console.error("Failed to load favorite status:", error);
+        }
+      };
+      loadFavoriteStatus();
+    }
+  }, [user, recipe?._id]);
+
+  const handleFavoriteToggle = async () => {
+    if (!user) {
+      Swal.fire({
+        title: "Please Log In",
+        text: "You need to be logged in to favorite recipes.",
+        icon: "warning",
+        confirmButtonColor: "#00693E",
+      });
+      return;
+    }
+
+    try {
+      const response = await toggleFavoriteRecipe(recipe._id);
+      if (response.action === "added") {
+        setIsFavorited(true);
+        Swal.fire({
+          title: "Added!",
+          text: "Recipe added to your favorites.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else if (response.action === "removed") {
+        setIsFavorited(false);
+        Swal.fire({
+          title: "Removed!",
+          text: "Recipe removed from your favorites.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling favorite status:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to toggle favorite status. Please try again.",
+        icon: "error",
+      });
+    }
+  };
 
   const handlePurchase = () => {
     Swal.fire({
@@ -194,7 +257,7 @@ export default function RecipeDetailsClient({ recipe }) {
             <div className="flex gap-2">
               <Button
                 variant="bordered"
-                onClick={() => setIsFavorited(!isFavorited)}
+                onClick={handleFavoriteToggle}
                 className={`flex-1 font-bold py-6 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all ${isFavorited ? "bg-red-50/50 text-red-500 border-red-200" : ""}`}
               >
                 <Heart

@@ -19,5 +19,5 @@ export const deleteRecipe = async id => {
 // Hint: Trigger a POST request to '/api/recipes/:id/favorite'.
 export const toggleFavoriteRecipe = async id => {
   // TODO: Uncomment and use this:
-  // return serverMutation(`/api/recipes/${id}/favorite`, {}, 'POST')
+  return serverMutation(`/api/recipes/${id}/favorite`, {}, 'POST')
 }
