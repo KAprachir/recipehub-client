@@ -291,7 +291,7 @@ export default function MyRecipesPage() {
       console.error("Delete failed", err);
     }
   };
-
+ 
   return (
     // Render your grid maps here...
   );

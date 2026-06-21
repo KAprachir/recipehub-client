@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, Avatar, Button } from "@heroui/react";
 import { motion } from "framer-motion";
 // 💡 BACKEND CALL: Import the query helper once defined inside lib/api/user.js:
-// import { getUserDashboardSummary } from "@/lib/api/user";
+import { getUserDashboardSummary } from "@/lib/api/user";
 import {
   BookOpen,
   Heart,
@@ -29,9 +29,9 @@ export default function UserOverviewPage() {
   //    const data = await getUserDashboardSummary();
   //    setStats(data);
   const [stats, setStats] = useState({
-    totalRecipes: 142,
-    totalFavorites: 843,
-    likesReceived: "3.2k",
+    totalRecipes: 0,
+    totalFavorites: 0,
+    likesReceived: 0,
     trendingRecipe: {
       name: "Spicy Truffle Risotto",
       views: "1.2k",
@@ -40,9 +40,26 @@ export default function UserOverviewPage() {
   });
 
   useEffect(() => {
-    // Simulate API loading
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
+    const loadData = async () => {
+      try {
+        const data = await getUserDashboardSummary();
+        if (data) {
+          setStats((prev) => ({
+            ...prev,
+            ...data,
+            trendingRecipe: {
+              ...prev.trendingRecipe,
+              ...(data.trendingRecipe || {}),
+            },
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading dashboard summary:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   // Animation variants
@@ -58,7 +75,11 @@ export default function UserOverviewPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
   };
 
   return (
@@ -95,7 +116,11 @@ export default function UserOverviewPage() {
           {/* Left Column: Stacked Metric Cards (1/3 Width) */}
           <div className="lg:col-span-1 space-y-6">
             {/* Metric Card 1: Total Recipes */}
-            <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+            >
               <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between relative overflow-hidden h-full">
                 <div className="flex items-center justify-between">
                   <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-[#046A38] dark:text-emerald-400 rounded-xl">
@@ -118,11 +143,19 @@ export default function UserOverviewPage() {
             </motion.div>
 
             {/* Metric Card 2: Total Favorites */}
-            <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+            >
               <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between relative overflow-hidden h-full">
                 <div className="flex items-center justify-between">
                   <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-500 dark:text-amber-400 rounded-xl">
-                    <Heart size={20} fill="currentColor" className="stroke-none" />
+                    <Heart
+                      size={20}
+                      fill="currentColor"
+                      className="stroke-none"
+                    />
                   </div>
                   <div className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg">
                     <TrendingUp size={12} />
@@ -141,11 +174,19 @@ export default function UserOverviewPage() {
             </motion.div>
 
             {/* Metric Card 3: Likes Received */}
-            <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+            >
               <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between relative overflow-hidden h-full">
                 <div className="flex items-center justify-between">
                   <div className="p-3 bg-orange-50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400 rounded-xl">
-                    <ThumbsUp size={20} fill="currentColor" className="stroke-none" />
+                    <ThumbsUp
+                      size={20}
+                      fill="currentColor"
+                      className="stroke-none"
+                    />
                   </div>
                   <div className="flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-lg">
                     <TrendingUp size={12} />
@@ -168,7 +209,6 @@ export default function UserOverviewPage() {
           <div className="lg:col-span-2 h-full">
             <motion.div variants={itemVariants} className="h-full">
               <Card className="p-6 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl flex flex-col justify-between h-full">
-                
                 {/* Header section matching mockup */}
                 <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-900/60 pb-4">
                   <h2 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight">
@@ -187,7 +227,6 @@ export default function UserOverviewPage() {
 
                 {/* Activity List container */}
                 <div className="divide-y divide-zinc-100 dark:divide-zinc-900/60 flex-1">
-                  
                   {/* Activity Item 1 */}
                   <div className="py-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -249,22 +288,36 @@ export default function UserOverviewPage() {
                       </div>
                       <div className="space-y-0.5">
                         <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 leading-snug">
-                          New Comment on &ldquo;Artisanal Sourdough Guide&rdquo;.
+                          New Comment on &ldquo;Artisanal Sourdough
+                          Guide&rdquo;.
                         </p>
                         <p className="text-[10px] text-zinc-400 font-medium">
                           Yesterday &bull; Community Interaction
                         </p>
                       </div>
                     </div>
-                    <MessageSquare size={15} className="text-zinc-400 shrink-0" />
+                    <MessageSquare
+                      size={15}
+                      className="text-zinc-400 shrink-0"
+                    />
                   </div>
 
                   {/* Activity Item 4 */}
                   <div className="py-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 shrink-0 border border-zinc-100 dark:border-zinc-900">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
                       </div>
                       <div className="space-y-0.5">
@@ -278,7 +331,6 @@ export default function UserOverviewPage() {
                     </div>
                     <Info size={15} className="text-zinc-400 shrink-0" />
                   </div>
-
                 </div>
               </Card>
             </motion.div>
@@ -291,7 +343,6 @@ export default function UserOverviewPage() {
           <div className="lg:col-span-3 h-full">
             <motion.div variants={itemVariants} className="h-full">
               <Card className="bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl overflow-hidden h-full flex flex-col md:flex-row relative">
-                
                 {/* Left content block */}
                 <div className="p-6 flex-1 flex flex-col justify-between space-y-6 z-10">
                   <div className="space-y-2">
@@ -367,16 +418,23 @@ export default function UserOverviewPage() {
                     { h: "65%", active: false },
                     { h: "45%", active: false },
                     { h: "85%", active: true }, // Highlighted bar in mockup
-                    { h: "35%", active: false }
+                    { h: "35%", active: false },
                   ].map((bar, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <div
+                      key={idx}
+                      className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end"
+                    >
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: bar.h }}
-                        transition={{ delay: 0.3 + idx * 0.05, duration: 0.6, ease: "easeOut" }}
+                        transition={{
+                          delay: 0.3 + idx * 0.05,
+                          duration: 0.6,
+                          ease: "easeOut",
+                        }}
                         className={`w-full rounded-t-[4px] ${
-                          bar.active 
-                            ? "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.4)]" 
+                          bar.active
+                            ? "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.4)]"
                             : "bg-zinc-800"
                         }`}
                       />
@@ -387,7 +445,6 @@ export default function UserOverviewPage() {
             </motion.div>
           </div>
         </div>
-
       </div>
 
       {/* ─── FOOTER AREA ─── */}
@@ -400,20 +457,33 @@ export default function UserOverviewPage() {
             RecipeHub
           </p>
           <p className="text-[10px] text-zinc-400 font-medium">
-            &copy; 2024 RecipeHub Professional Culinary Systems. All rights reserved.
+            &copy; 2024 RecipeHub Professional Culinary Systems. All rights
+            reserved.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             About Us
           </Link>
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             Privacy Policy
           </Link>
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             Terms of Service
           </Link>
-          <Link href="#" className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors">
+          <Link
+            href="#"
+            className="hover:text-[#046A38] dark:hover:text-emerald-400 transition-colors"
+          >
             Contact Support
           </Link>
         </div>

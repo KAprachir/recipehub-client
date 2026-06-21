@@ -38,6 +38,5 @@ export const getUserRecipes = async () => {
 // 2. Get premium recipes purchased/unlocked by the active logged-in user.
 // Hint: You should call serverFetch with the path '/api/user/purchased' and disable cache.
 export const getUserPurchasedRecipes = async () => {
-  // TODO: Uncomment and use this:
-  // return serverFetch('/api/user/purchased', { cache: 'no-store' })
+  return serverFetch('/api/user/purchased', { cache: 'no-store' })
 }
