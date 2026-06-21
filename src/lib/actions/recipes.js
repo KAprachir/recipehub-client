@@ -1,23 +1,16 @@
 import { serverMutation } from '../core/server'
 
+// Create Recipe: Submits a new recipe document to the backend
 export const createRecipe = async newRecipeData => {
   return serverMutation('/api/recipes', newRecipeData, 'POST')
 }
 
-// ==========================================
-// 💡 LEARN & CONNECT STEP: YOUR TASK STARTS HERE!
-// Implement the following mutation actions using serverMutation().
-// ==========================================
-
-// 1. Delete user's own recipe.
-// Hint: Trigger a DELETE request to '/api/recipes/:id'.
+// Delete Recipe: Removes a user's own recipe by its ID
 export const deleteRecipe = async id => {
   return serverMutation(`/api/recipes/${id}`, {}, 'DELETE')
 }
 
-// 2. Toggle favorite status (adds or removes a recipe from the user's favorites).
-// Hint: Trigger a POST request to '/api/recipes/:id/favorite'.
-export const toggleFavoriteRecipe = async id => {
-  // TODO: Uncomment and use this:
+// Toggle Favorite Status: Adds or removes a recipe from the user's favorites in the database
+export const toggleFavoriteRecipe = async (id) => {
   return serverMutation(`/api/recipes/${id}/favorite`, {}, 'POST')
 }

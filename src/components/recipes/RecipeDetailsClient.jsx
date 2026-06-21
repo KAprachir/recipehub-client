@@ -23,14 +23,17 @@ import { toggleFavoriteRecipe } from "@/lib/actions/recipes";
 export default function RecipeDetailsClient({ recipe }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
+  // Check active user authentication state
   const { user } = useAuth();
 
+  // Load user's favorite status on page mount or user auth state change
   useEffect(() => {
     if (user && recipe?._id) {
       const loadFavoriteStatus = async () => {
         try {
           const favorites = await getUserFavorites();
           if (Array.isArray(favorites)) {
+            // Check if current recipe._id exists in user's favorites list
             const isFav = favorites.some((fav) => fav._id === recipe._id);
             setIsFavorited(isFav);
           }
@@ -42,7 +45,9 @@ export default function RecipeDetailsClient({ recipe }) {
     }
   }, [user, recipe?._id]);
 
+  // Request the backend to toggle favorite status (adds or removes)
   const handleFavoriteToggle = async () => {
+    // Restrict favoriting to logged-in users only
     if (!user) {
       Swal.fire({
         title: "Please Log In",
@@ -55,6 +60,8 @@ export default function RecipeDetailsClient({ recipe }) {
 
     try {
       const response = await toggleFavoriteRecipe(recipe._id);
+      
+      // Update UI state and notify user based on backend toggle results
       if (response.action === "added") {
         setIsFavorited(true);
         Swal.fire({

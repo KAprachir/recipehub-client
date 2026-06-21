@@ -1,9 +1,11 @@
 import { serverFetch } from '../core/server'
 
+// Get Admin Recipes Summary: Fetch overview of all recipes for administrative dashboards
 export async function getAdminRecipesData () {
   return await serverFetch('/api/admin/recipes-summary')
 }
 
+// Get Recipes: Query recipes dynamically with filters (page, category, cuisine, etc.)
 export const getRecipes = async filters => {
   const { page, category, cuisine, difficulty, maxTime, sortBy } = filters
 
@@ -20,23 +22,17 @@ export const getRecipes = async filters => {
   })
 }
 
+// Get Recipe By ID: Retrieve detail page data for a specific recipe
 export const getRecipeById = async id => {
   return serverFetch(`/api/recipes/${id}`)
 }
 
-// ==========================================
-// 💡 LEARN & CONNECT STEP: YOUR TASK STARTS HERE!
-// Implement the following functions using serverFetch() once your backend API is ready.
-// ==========================================
-
-// 1. Get user-specific recipes created by the active logged-in user.
-// Hint: You should call serverFetch with the path '/api/user/my-recipes' and disable cache.
+// Get User Recipes: Retrieve user-specific recipes created by the active logged-in user
 export const getUserRecipes = async () => {
   return serverFetch('/api/user/my-recipes', { cache: 'no-store' })
 }
 
-// 2. Get premium recipes purchased/unlocked by the active logged-in user.
-// Hint: You should call serverFetch with the path '/api/user/purchased' and disable cache.
+// Get User Purchased Recipes: Retrieve premium recipes purchased/unlocked by the logged-in user
 export const getUserPurchasedRecipes = async () => {
   return serverFetch('/api/user/purchased', { cache: 'no-store' })
 }

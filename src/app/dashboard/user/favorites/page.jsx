@@ -18,6 +18,7 @@ export default function FavoritesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch all favorited recipes on component mount
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
@@ -34,6 +35,7 @@ export default function FavoritesPage() {
     fetchFavorites();
   }, []);
 
+  // Remove a recipe from favorites list by calling the server action
   const handleRemoveFavorite = async (recipeId, recipeName) => {
     Swal.fire({
       title: "Remove from Favorites?",
@@ -46,9 +48,10 @@ export default function FavoritesPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          // Toggle favorite state on the database (deletes the pairing)
           await toggleFavoriteRecipe(recipeId);
           
-          // Update local state:
+          // Instantly filter out the removed recipe from local state to update the UI
           setFavorites((prev) => prev.filter((r) => (r._id || r.id) !== recipeId));
           
           Swal.fire("Removed!", "Recipe removed from favorites.", "success");
@@ -59,7 +62,7 @@ export default function FavoritesPage() {
     });
   };
 
-  // Client-side search helper. 
+  // Client-side search helper: filters favorited recipes by name or category
   const filteredFavorites = favorites.filter((recipe) => {
     const name = recipe.recipeName || recipe.name || "";
     const category = recipe.category || "";
