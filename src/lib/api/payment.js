@@ -8,13 +8,11 @@ import { serverFetch, serverMutation } from '../core/server'
 // 1. Verify payment session token (synchronize user membership to 'premium').
 // Hint: Trigger a GET query to `/api/payment/verify?session_id=${sessionId}`.
 export const verifyPaymentSession = async sessionId => {
-  // TODO: Uncomment and use this:
-  // return serverFetch(`/api/payment/verify?session_id=${sessionId}`, { cache: 'no-store' })
+  return serverFetch(`/api/payment/verify?session_id=${sessionId}`, { cache: 'no-store' })
 }
 
 // 2. Audit/Log transaction cancellation for diagnostic reports.
 // Hint: Trigger a POST request to `/api/payment/log-cancel`.
 export const logPaymentCancel = async data => {
-  // TODO: Uncomment and use this:
-  // return serverMutation('/api/payment/log-cancel', data, 'POST')
+  return serverMutation('/api/payment/log-cancel', data, 'POST')
 }

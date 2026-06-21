@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Card, Button } from "@heroui/react";
 import { motion } from "framer-motion";
 // 💡 BACKEND CALL: Import the query/mutation helpers once defined in lib/api/admin.js and lib/actions/admin.js:
-// import { getAdminDashboardSummary } from "@/lib/api/admin";
-// import { runDiagnostics } from "@/lib/actions/admin";
+import { getAdminDashboardSummary } from "@/lib/api/admin";
+import { runDiagnostics } from "@/lib/actions/admin";
 import {
   Users,
   Utensils,
@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Activity,
 } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function AdminOverviewPage() {
   const [loading, setLoading] = useState(true);
@@ -30,15 +31,32 @@ export default function AdminOverviewPage() {
   //    const data = await getAdminDashboardSummary();
   //    setStats(data);
   const [stats, setStats] = useState({
-    totalUsers: "24,512",
-    totalRecipes: "128,902",
-    premiumMembers: "8,104",
-    totalReports: "42",
+    totalUsers: "0",
+    totalRecipes: "0",
+    premiumMembers: "0",
+    totalReports: "0",
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
+    const fetchAdminStats = async () => {
+      try {
+        setLoading(true);
+        const data = await getAdminDashboardSummary();
+        if (data) {
+          setStats({
+            totalUsers: data.totalUsers?.toLocaleString() || "0",
+            totalRecipes: data.totalRecipes?.toLocaleString() || "0",
+            premiumMembers: data.premiumMembers?.toLocaleString() || "0",
+            totalReports: data.totalReports?.toLocaleString() || "0",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch admin stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAdminStats();
   }, []);
 
   // 💡 BACKEND CALL:
@@ -48,9 +66,39 @@ export default function AdminOverviewPage() {
   const handleDiagnostics = async () => {
     try {
       console.log("Running diagnostics...");
-      // await runDiagnostics();
+      Swal.fire({
+        title: "Starting Diagnostics...",
+        text: "Please wait while system checks are executed.",
+        icon: "info",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+        color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      const res = await runDiagnostics();
+      
+      Swal.fire({
+        title: "Diagnostics Completed!",
+        text: res?.message || "System-wide diagnostic checks passed successfully.",
+        icon: "success",
+        confirmButtonColor: "#046A38",
+        background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+        color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+      });
     } catch (error) {
       console.error("Failed to run diagnostics:", error);
+      Swal.fire({
+        title: "Diagnostics Failed",
+        text: error.message || "An error occurred while running server diagnostics.",
+        icon: "error",
+        confirmButtonColor: "#EF4444",
+        background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+        color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+      });
     }
   };
 

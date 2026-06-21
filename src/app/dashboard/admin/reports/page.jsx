@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Card, Button, Input } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
 // 💡 BACKEND CALL: Import the query/mutation helpers once defined in lib/api/admin.js and lib/actions/admin.js:
-// import { getAdminReports } from "@/lib/api/admin";
-// import { dismissReport, takeDownRecipe } from "@/lib/actions/admin";
+import { getAdminReports } from "@/lib/api/admin";
+import { dismissReport, takeDownRecipe } from "@/lib/actions/admin";
 import {
   AlertTriangle,
   Search,
@@ -35,57 +35,12 @@ export default function AdminReportPage() {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        
-        const mockReports = [
-          {
-            id: "REP-1024",
-            recipeName: "Spicy Ghost Pepper Burger",
-            recipeId: "rec_01",
-            reporter: "John Doe",
-            reason: "Dangerous ingredients / Health hazard risk",
-            details: "Contains unsafe levels of capsaicin extract without proper warnings for children.",
-            status: "Pending",
-            date: "June 19, 2026",
-            severity: "High",
-          },
-          {
-            id: "REP-1025",
-            recipeName: "Grandma's Secret Lemon Tart",
-            recipeId: "rec_02",
-            reporter: "Alice Smith",
-            reason: "Copyright Violation",
-            details: "Copied word-for-word from a copyrighted cookbook published in 2021.",
-            status: "Pending",
-            date: "June 18, 2026",
-            severity: "Medium",
-          },
-          {
-            id: "REP-1026",
-            recipeName: "Easy 5-Minute Microwave Mug Cake",
-            recipeId: "rec_03",
-            reporter: "Chef Michael",
-            reason: "Spam / Low Quality",
-            details: "Just lists 'put flour and sugar in mug' with zero measurements and gibberish steps.",
-            status: "Resolved",
-            date: "June 15, 2026",
-            severity: "Low",
-          },
-          {
-            id: "REP-1027",
-            recipeName: "Vibrant Summer Salad",
-            recipeId: "rec_04",
-            reporter: "Sarah Connor",
-            reason: "Harassment / Hate Speech",
-            details: "Description contains offensive remarks targeting specific dietary communities.",
-            status: "Dismissed",
-            date: "June 12, 2026",
-            severity: "High",
-          },
-        ];
-
-        setReports(mockReports);
+        const data = await getAdminReports();
+        if (data && Array.isArray(data)) {
+          setReports(data);
+        } else {
+          setReports([]);
+        }
       } catch (err) {
         console.error("Error fetching system reports:", err);
       } finally {
@@ -98,17 +53,17 @@ export default function AdminReportPage() {
 
   // Filter reports by activeTab status and searchQuery
   const filteredReports = reports.filter((report) => {
-    const matchesTab = activeTab === "All" || report.status === activeTab;
+    const matchesTab = activeTab === "All" || (report.status || "Pending") === activeTab;
     const matchesSearch =
-      report.recipeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.reporter.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.reason.toLowerCase().includes(searchQuery.toLowerCase());
+      (report.recipeName || report.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (report.reporter || "Anonymous").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (report.reason || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
   // Calculate quick metric aggregates
   const totalCount = reports.length;
-  const pendingCount = reports.filter((r) => r.status === "Pending").length;
+  const pendingCount = reports.filter((r) => (r.status || "Pending") === "Pending").length;
   const resolvedCount = reports.filter((r) => r.status === "Resolved").length;
   const dismissedCount = reports.filter((r) => r.status === "Dismissed").length;
 
@@ -128,21 +83,34 @@ export default function AdminReportPage() {
       confirmButtonText: "Yes, Dismiss it!",
       background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
       color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setReports((prev) =>
-          prev.map((rep) =>
-            rep.id === reportId ? { ...rep, status: "Dismissed" } : rep
-          )
-        );
-        Swal.fire({
-          title: "Dismissed!",
-          text: "Report has been safely dismissed.",
-          icon: "success",
-          confirmButtonColor: "#046A38",
-          background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
-          color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
-        });
+        try {
+          await dismissReport(reportId);
+          setReports((prev) =>
+            prev.map((rep) =>
+              (rep.id || rep._id) === reportId ? { ...rep, status: "Dismissed" } : rep
+            )
+          );
+          Swal.fire({
+            title: "Dismissed!",
+            text: "Report has been safely dismissed.",
+            icon: "success",
+            confirmButtonColor: "#046A38",
+            background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+            color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+          });
+        } catch (error) {
+          console.error("Failed to dismiss report:", error);
+          Swal.fire({
+            title: "Error",
+            text: error.message || "Failed to dismiss the report.",
+            icon: "error",
+            confirmButtonColor: "#EF4444",
+            background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+            color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+          });
+        }
       }
     });
   };
@@ -163,21 +131,34 @@ export default function AdminReportPage() {
       confirmButtonText: "Yes, Take Down!",
       background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
       color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setReports((prev) =>
-          prev.map((rep) =>
-            rep.id === reportId ? { ...rep, status: "Resolved" } : rep
-          )
-        );
-        Swal.fire({
-          title: "Removed!",
-          text: "The recipe has been taken down and the report is resolved.",
-          icon: "success",
-          confirmButtonColor: "#046A38",
-          background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
-          color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
-        });
+        try {
+          await takeDownRecipe(reportId);
+          setReports((prev) =>
+            prev.map((rep) =>
+              (rep.id || rep._id) === reportId ? { ...rep, status: "Resolved" } : rep
+            )
+          );
+          Swal.fire({
+            title: "Removed!",
+            text: "The recipe has been taken down and the report is resolved.",
+            icon: "success",
+            confirmButtonColor: "#046A38",
+            background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+            color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+          });
+        } catch (error) {
+          console.error("Failed to take down recipe:", error);
+          Swal.fire({
+            title: "Error",
+            text: error.message || "Failed to take down the recipe.",
+            icon: "error",
+            confirmButtonColor: "#EF4444",
+            background: document.documentElement.classList.contains("dark") ? "#18181b" : "#ffffff",
+            color: document.documentElement.classList.contains("dark") ? "#f4f4f5" : "#18181b",
+          });
+        }
       }
     });
   };
@@ -312,83 +293,94 @@ export default function AdminReportPage() {
                 variants={containerVariants}
                 className="space-y-4"
               >
-                {filteredReports.map((report) => (
-                  <motion.div
-                    key={report.id}
-                    variants={itemVariants}
-                    layoutId={report.id}
-                  >
-                    <Card className="p-5 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-2xs rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-5 group">
-                      
-                      {/* Left: Info Stack */}
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center flex-wrap gap-2">
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded-md">
-                            {report.id}
-                          </span>
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            report.severity === "High"
-                              ? "bg-red-50 dark:bg-red-950/20 text-red-600"
-                              : report.severity === "Medium"
-                              ? "bg-amber-50 dark:bg-amber-950/20 text-amber-600"
-                              : "bg-teal-50 dark:bg-teal-950/20 text-teal-600"
-                          }`}>
-                            {report.severity} Priority
-                          </span>
-                          <span className="text-[10px] text-zinc-400 font-medium">
-                            Reported &bull; {report.date}
-                          </span>
-                        </div>
+                {filteredReports.map((report) => {
+                  const reportId = report.id || report._id;
+                  const recipeName = report.recipeName || "Unknown Recipe";
+                  const severity = report.severity || "Medium";
+                  const reporter = report.reporter || "Anonymous";
+                  const reason = report.reason || "Not specified";
+                  const details = report.details || "No details provided";
+                  const status = report.status || "Pending";
+                  const date = report.date || (report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "N/A");
 
-                        <h3 className="text-sm font-black text-zinc-900 dark:text-white leading-snug">
-                          Recipe: <span className="hover:underline text-[#046A38] dark:text-emerald-400 cursor-pointer">{report.recipeName}</span>
-                        </h3>
-
-                        <p className="text-xs text-zinc-700 dark:text-zinc-300 font-semibold leading-relaxed">
-                          <span className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider block">Reason: {report.reason}</span>
-                          {report.details}
-                        </p>
-
-                        <div className="text-[10px] text-zinc-400 font-semibold">
-                          Reporter: <span className="text-zinc-800 dark:text-zinc-300">{report.reporter}</span>
-                        </div>
-                      </div>
-
-                      {/* Right: Actions Column */}
-                      <div className="flex flex-row md:flex-col items-center justify-end gap-2.5 shrink-0 pt-2 border-t border-zinc-100 dark:border-zinc-900 md:pt-0 md:border-t-0">
-                        {report.status === "Pending" ? (
-                          <>
-                            {/* Take Down Button */}
-                            <Button
-                              onClick={() => handleTakeDownRecipe(report.id, report.recipeName)}
-                              size="sm"
-                              className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold text-[10px] uppercase rounded-lg hover:bg-red-600 hover:text-white transition-colors cursor-pointer w-full md:w-32 h-8"
-                            >
-                              <Trash2 size={12} className="mr-1" />
-                              Take Down
-                            </Button>
-
-                            {/* Dismiss Button */}
-                            <Button
-                              onClick={() => handleDismissReport(report.id)}
-                              size="sm"
-                              variant="bordered"
-                              className="border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold text-[10px] uppercase rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all cursor-pointer w-full md:w-32 h-8"
-                            >
-                              <CheckCircle size={12} className="mr-1" />
-                              Dismiss
-                            </Button>
-                          </>
-                        ) : (
-                          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-900/80 px-4 py-2 rounded-lg">
-                            <span>Status: {report.status}</span>
+                  return (
+                    <motion.div
+                      key={reportId}
+                      variants={itemVariants}
+                      layoutId={reportId}
+                    >
+                      <Card className="p-5 bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-2xs rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-5 group">
+                        
+                        {/* Left: Info Stack */}
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center flex-wrap gap-2">
+                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded-md">
+                              {reportId}
+                            </span>
+                            <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                              severity === "High"
+                                ? "bg-red-50 dark:bg-red-950/20 text-red-600"
+                                : severity === "Medium"
+                                ? "bg-amber-50 dark:bg-amber-950/20 text-amber-600"
+                                : "bg-teal-50 dark:bg-teal-950/20 text-teal-600"
+                            }`}>
+                              {severity} Priority
+                            </span>
+                            <span className="text-[10px] text-zinc-400 font-medium">
+                              Reported &bull; {date}
+                            </span>
                           </div>
-                        )}
-                      </div>
 
-                    </Card>
-                  </motion.div>
-                ))}
+                          <h3 className="text-sm font-black text-zinc-900 dark:text-white leading-snug">
+                            Recipe: <span className="hover:underline text-[#046A38] dark:text-emerald-400 cursor-pointer">{recipeName}</span>
+                          </h3>
+
+                          <p className="text-xs text-zinc-700 dark:text-zinc-300 font-semibold leading-relaxed">
+                            <span className="text-zinc-400 font-bold uppercase text-[9px] tracking-wider block">Reason: {reason}</span>
+                            {details}
+                          </p>
+
+                          <div className="text-[10px] text-zinc-400 font-semibold">
+                            Reporter: <span className="text-zinc-800 dark:text-zinc-300">{reporter}</span>
+                          </div>
+                        </div>
+
+                        {/* Right: Actions Column */}
+                        <div className="flex flex-row md:flex-col items-center justify-end gap-2.5 shrink-0 pt-2 border-t border-zinc-100 dark:border-zinc-900 md:pt-0 md:border-t-0">
+                          {status === "Pending" ? (
+                            <>
+                              {/* Take Down Button */}
+                              <Button
+                                onClick={() => handleTakeDownRecipe(reportId, recipeName)}
+                                size="sm"
+                                className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold text-[10px] uppercase rounded-lg hover:bg-red-600 hover:text-white transition-colors cursor-pointer w-full md:w-32 h-8"
+                              >
+                                <Trash2 size={12} className="mr-1" />
+                                Take Down
+                              </Button>
+
+                              {/* Dismiss Button */}
+                              <Button
+                                onClick={() => handleDismissReport(reportId)}
+                                size="sm"
+                                variant="bordered"
+                                className="border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold text-[10px] uppercase rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all cursor-pointer w-full md:w-32 h-8"
+                              >
+                                <CheckCircle size={12} className="mr-1" />
+                                Dismiss
+                              </Button>
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-900/80 px-4 py-2 rounded-lg">
+                              <span>Status: {status}</span>
+                            </div>
+                          )}
+                        </div>
+
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             ) : (
               <motion.div

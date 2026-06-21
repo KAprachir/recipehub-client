@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, Input, Button } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
 // 💡 BACKEND CALL: Import the API query helper once you implement it inside src/lib/api/recipes.js:
-// import { getUserPurchasedRecipes } from "@/lib/api/recipes";
+import { getUserPurchasedRecipes } from "@/lib/api/recipes";
 import {
   Search,
   BookOpen,
@@ -22,87 +22,16 @@ export default function UserPurchasedPage() {
   const [loading, setLoading] = useState(true);
   const [recipes, setRecipes] = useState([]);
 
-  // 💡 BACKEND CALL:
-  // To connect to your backend:
-  // 1. Uncomment the import at the top of this file.
-  // 2. Replace the local mock data inside try {} with:
-  //    const data = await getUserPurchasedRecipes();
-  //    setRecipes(data);
   useEffect(() => {
     const fetchPurchasedRecipes = async () => {
       try {
         setLoading(true);
-        // Simulate network latency
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        
-        const mockPurchased = [
-          {
-            id: "1",
-            title: "Classic Beef Beef Wellington",
-            creator: {
-              name: "Gordon Ramsay",
-              avatar: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=80&q=80",
-            },
-            category: "Meat & Poultry",
-            price: "$14.99",
-            image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80",
-            duration: "2h 30m",
-            difficulty: "Hard",
-            rating: 4.9,
-            reviewsCount: 142,
-            purchasedAt: "June 14, 2026",
-          },
-          {
-            id: "2",
-            title: "Traditional Seafood Paella",
-            creator: {
-              name: "Elena Arzak",
-              avatar: "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=80&q=80",
-            },
-            category: "Seafood",
-            price: "$9.99",
-            image: "https://images.unsplash.com/photo-1534080391025-a77b0af87ee2?auto=format&fit=crop&w=600&q=80",
-            duration: "1h 15m",
-            difficulty: "Medium",
-            rating: 4.8,
-            reviewsCount: 98,
-            purchasedAt: "May 28, 2026",
-          },
-          {
-            id: "3",
-            title: "Signature Matcha Mille Crepe",
-            creator: {
-              name: "Dominique Ansel",
-              avatar: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=80&q=80",
-            },
-            category: "Desserts",
-            price: "$12.00",
-            image: "https://images.unsplash.com/photo-1536680465769-2365207b035e?auto=format&fit=crop&w=600&q=80",
-            duration: "3h 00m",
-            difficulty: "Hard",
-            rating: 4.95,
-            reviewsCount: 310,
-            purchasedAt: "May 10, 2026",
-          },
-          {
-            id: "4",
-            title: "Truffle Tagliatelle Carbonara",
-            creator: {
-              name: "Massimo Bottura",
-              avatar: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=80&q=80",
-            },
-            category: "Pasta",
-            price: "$8.50",
-            image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=600&q=80",
-            duration: "45 mins",
-            difficulty: "Medium",
-            rating: 4.75,
-            reviewsCount: 84,
-            purchasedAt: "April 18, 2026",
-          },
-        ];
-
-        setRecipes(mockPurchased);
+        const data = await getUserPurchasedRecipes();
+        if (data && Array.isArray(data)) {
+          setRecipes(data);
+        } else {
+          setRecipes([]);
+        }
       } catch (err) {
         console.error("Error loading purchased recipes:", err);
       } finally {
@@ -116,9 +45,9 @@ export default function UserPurchasedPage() {
   // Filter recipes based on search
   const filteredRecipes = recipes.filter(
     (recipe) =>
-      recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.creator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.category.toLowerCase().includes(searchQuery.toLowerCase())
+      (recipe.recipeName || recipe.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (recipe.authorName || recipe.creator?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (recipe.category || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Animation variants
@@ -203,99 +132,108 @@ export default function UserPurchasedPage() {
                 variants={containerVariants}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               >
-                {filteredRecipes.map((recipe) => (
-                  <motion.div
-                    key={recipe.id}
-                    variants={itemVariants}
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card className="bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl overflow-hidden flex flex-col justify-between h-[420px] group">
-                      
-                      {/* Image Top Frame */}
-                      <div className="relative h-44 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shrink-0">
-                        <img
-                          src={recipe.image}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute top-3 left-3 flex gap-2">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-white bg-zinc-900/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-white/10 flex items-center gap-1 shadow-xs">
-                            <Sparkles size={10} className="text-amber-400 stroke-[2.5]" />
-                            Unlocked
-                          </span>
-                        </div>
-                        <span className="absolute bottom-3 right-3 text-[9px] font-bold text-white bg-zinc-950/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-white/5">
-                          {recipe.category}
-                        </span>
-                      </div>
+                {filteredRecipes.map((recipe) => {
+                  const recipeId = recipe._id || recipe.id;
+                  const displayTitle = recipe.recipeName || recipe.title || "Untitled Recipe";
+                  const displayImage = recipe.recipeImage || recipe.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c";
+                  const displayAuthorName = recipe.authorName || recipe.creator?.name || "Anonymous Chef";
+                  const displayAuthorAvatar = recipe.authorImage || recipe.creator?.avatar || "https://images.unsplash.com/photo-1577219491135-ce391730fb2c";
+                  const displayDuration = recipe.preparationTime ? `${recipe.preparationTime} mins` : (recipe.duration || "N/A");
+                  const displayDifficulty = recipe.difficultyLevel || recipe.difficulty || "Medium";
+                  const displayRating = recipe.rating || 4.8;
+                  const displayReviewsCount = recipe.reviewsCount || 100;
+                  const displayCategory = recipe.category || "General";
 
-                      {/* Content Section */}
-                      <div className="p-5 flex-1 flex flex-col justify-between">
-                        <div>
-                          {/* Chef Row */}
-                          <div className="flex items-center gap-2 mb-2.5">
-                            <img
-                              src={recipe.creator.avatar}
-                              alt={recipe.creator.name}
-                              className="w-5 h-5 rounded-full object-cover border border-zinc-200 dark:border-zinc-800"
-                            />
-                            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-                              By {recipe.creator.name}
+                  return (
+                    <motion.div
+                      key={recipeId}
+                      variants={itemVariants}
+                      whileHover={{ y: -4 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Card className="bg-white dark:bg-zinc-950 border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs rounded-2xl overflow-hidden flex flex-col justify-between h-[420px] group">
+                        
+                        {/* Image Top Frame */}
+                        <div className="relative h-44 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900 shrink-0">
+                          <img
+                            src={displayImage}
+                            alt={displayTitle}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute top-3 left-3 flex gap-2">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-white bg-zinc-900/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-white/10 flex items-center gap-1 shadow-xs">
+                              <Sparkles size={10} className="text-amber-400 stroke-[2.5]" />
+                              Unlocked
                             </span>
                           </div>
+                          <span className="absolute bottom-3 right-3 text-[9px] font-bold text-white bg-zinc-950/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-white/5">
+                            {displayCategory}
+                          </span>
+                        </div>
 
-                          <h2 className="text-sm font-black text-zinc-900 dark:text-white group-hover:text-[#046A38] dark:group-hover:text-emerald-400 transition-colors line-clamp-1 leading-snug">
-                            {recipe.title}
-                          </h2>
+                        {/* Content Section */}
+                        <div className="p-5 flex-1 flex flex-col justify-between">
+                          <div>
+                            {/* Chef Row */}
+                            <div className="flex items-center gap-2 mb-2.5">
+                              <img
+                                src={displayAuthorAvatar}
+                                alt={displayAuthorName}
+                                className="w-5 h-5 rounded-full object-cover border border-zinc-200 dark:border-zinc-800"
+                              />
+                              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                                By {displayAuthorName}
+                              </span>
+                            </div>
 
-                          {/* Quick details */}
-                          <div className="flex items-center gap-3.5 mt-3 text-[10px] font-bold text-zinc-500">
-                            <div className="flex items-center gap-1">
-                              <Clock size={12} className="text-zinc-400" />
-                              <span>{recipe.duration}</span>
+                            <h2 className="text-sm font-black text-zinc-900 dark:text-white group-hover:text-[#046A38] dark:group-hover:text-emerald-400 transition-colors line-clamp-1 leading-snug">
+                              {displayTitle}
+                            </h2>
+
+                            {/* Quick details */}
+                            <div className="flex items-center gap-3.5 mt-3 text-[10px] font-bold text-zinc-500">
+                              <div className="flex items-center gap-1">
+                                <Clock size={12} className="text-zinc-400" />
+                                <span>{displayDuration}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <ChefHat size={12} className="text-zinc-400" />
+                                <span>{displayDifficulty}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Star size={12} className="text-amber-400 fill-amber-400 stroke-none" />
+                                <span className="text-zinc-900 dark:text-zinc-300">{displayRating}</span>
+                                <span className="text-zinc-400 font-medium">({displayReviewsCount})</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <ChefHat size={12} className="text-zinc-400" />
-                              <span>{recipe.difficulty}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star size={12} className="text-amber-400 fill-amber-400 stroke-none" />
-                              <span className="text-zinc-900 dark:text-zinc-300">{recipe.rating}</span>
-                              <span className="text-zinc-400 font-medium">({recipe.reviewsCount})</span>
-                            </div>
+                          </div>
+
+                          {/* Card bottom actions row */}
+                          <div className="border-t border-zinc-100 dark:border-zinc-900/60 pt-4 mt-4 flex items-center justify-between gap-3 shrink-0">
+                            <button
+                              onClick={() => handleDownloadCard(recipeId)}
+                              className="p-2 text-zinc-400 hover:text-[#046A38] dark:hover:text-emerald-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors cursor-pointer"
+                              title="Download PDF Card"
+                            >
+                              <Download size={15} />
+                            </button>
+                            
+                            <Link href={`/recipes/${recipeId}`} className="flex-1">
+                              <Button
+                                size="sm"
+                                className="w-full bg-emerald-50 dark:bg-emerald-950/20 text-[#046A38] dark:text-emerald-400 font-bold text-[10px] uppercase rounded-xl hover:bg-[#046A38] hover:text-white dark:hover:bg-emerald-500 dark:hover:text-zinc-950 transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1 h-9"
+                              >
+                                <span>Cook Now</span>
+                                <ArrowRight size={12} />
+                              </Button>
+                            </Link>
                           </div>
                         </div>
 
-                        {/* Card bottom actions row */}
-                        <div className="border-t border-zinc-100 dark:border-zinc-900/60 pt-4 mt-4 flex items-center justify-between gap-3 shrink-0">
-                          <button
-                            onClick={() => handleDownloadCard(recipe.id)}
-                            className="p-2 text-zinc-400 hover:text-[#046A38] dark:hover:text-emerald-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors cursor-pointer"
-                            title="Download PDF Card"
-                          >
-                            <Download size={15} />
-                          </button>
-                          
-                          {/* 💡 SERVER INTEGRATION STEP 3:
-                              Update href link to point to your standard dynamic recipe detail page.
-                              Example: href={`/recipes/${recipe.id}`}
-                          */}
-                          <Link href="#" className="flex-1">
-                            <Button
-                              size="sm"
-                              className="w-full bg-emerald-50 dark:bg-emerald-950/20 text-[#046A38] dark:text-emerald-400 font-bold text-[10px] uppercase rounded-xl hover:bg-[#046A38] hover:text-white dark:hover:bg-emerald-500 dark:hover:text-zinc-950 transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1 h-9"
-                            >
-                              <span>Cook Now</span>
-                              <ArrowRight size={12} />
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-
-                    </Card>
-                  </motion.div>
-                ))}
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             ) : (
               <motion.div

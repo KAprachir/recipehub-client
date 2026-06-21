@@ -8,13 +8,11 @@ import { serverFetch } from '../core/server'
 // 1. Fetch total users, recipes, premium members, and logs for the admin command center.
 // Hint: Query '/api/admin/overview-summary' with no-store.
 export const getAdminDashboardSummary = async () => {
-  // TODO: Uncomment and use this:
-  // return serverFetch('/api/admin/overview-summary', { cache: 'no-store' })
+  return serverFetch('/api/admin/overview-summary', { cache: 'no-store' })
 }
 
 // 2. Fetch all reported items and flags.
 // Hint: Query '/api/admin/reports' with no-store.
 export const getAdminReports = async () => {
-  // TODO: Uncomment and use this:
-  // return serverFetch('/api/admin/reports', { cache: 'no-store' })
+  return serverFetch('/api/admin/reports', { cache: 'no-store' })
 }

@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Card, Button } from "@heroui/react";
 import { motion } from "framer-motion";
 // 💡 BACKEND CALL: Import the query helper once defined inside lib/api/payment.js:
-// import { verifyPaymentSession } from "@/lib/api/payment";
+import { verifyPaymentSession } from "@/lib/api/payment";
 import { Check, ShieldCheck, ArrowRight, ExternalLink, Calendar, CreditCard, Receipt } from "lucide-react";
 
 function SuccessContent() {
@@ -34,18 +34,26 @@ function SuccessContent() {
 
     if (sessionId || paymentIntent) {
       console.log("Verifying payment on backend with parameters:", { sessionId, paymentIntent });
-      // Call your backend verification server and update local txDetails state:
-      // const verifyPayment = async () => {
-      //   const res = await fetch(`/api/payment/verify?session_id=${sessionId}`);
-      //   const data = await res.json();
-      //   setTxDetails({
-      //     txId: data.transactionId,
-      //     amount: data.amount,
-      //     method: data.method,
-      //     date: data.date
-      //   });
-      // };
-      // verifyPayment();
+      const verifyPayment = async () => {
+        try {
+          const data = await verifyPaymentSession(sessionId || paymentIntent);
+          if (data) {
+            setTxDetails({
+              txId: data.transactionId || data.txId || sessionId || "TXN-VERIFIED",
+              amount: data.amount || "$14.99",
+              method: data.method || "Stripe Checkout",
+              date: data.date || new Date().toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }),
+            });
+          }
+        } catch (error) {
+          console.error("Failed to verify payment session:", error);
+        }
+      };
+      verifyPayment();
     }
   }, [searchParams]);
 
