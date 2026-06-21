@@ -4,8 +4,7 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Card, Button } from "@heroui/react";
 import { motion } from "framer-motion";
-// 💡 BACKEND CALL: Import the cancellation audit logger once you define it:
-// import { logPaymentCancel } from "@/lib/api/payment";
+
 import { X, HelpCircle, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 
 function CancelContent() {
@@ -69,13 +68,7 @@ function CancelContent() {
           </ul>
         </div>
 
-        {/* 💡 SERVER INTEGRATION NOTE:
-            No client state updates are needed on cancellation. 
-            If you need to log failed purchase attempts for audit purposes, you can hook up an API logger call:
-            // useEffect(() => {
-            //   navigator.sendBeacon('/api/payment/log-cancel', JSON.stringify({ userId, timestamp: Date.now() }));
-            // }, []);
-        */}
+
 
         {/* Actions Row */}
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
