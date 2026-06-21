@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@heroui/react";
 import { Mail, Lock, LogIn, ChefHat } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createAuthClient } from "better-auth/client";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,6 @@ export default function LoginPage() {
   };
 
   // google signIn
-  const authClient = createAuthClient();
   const googleSignIn = async () => {
     try {
       await authClient.signIn.social({

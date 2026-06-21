@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { createAuthClient } from "better-auth/client";
 
 export default function RegisterPage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -77,7 +76,6 @@ export default function RegisterPage() {
   };
 
   // google signIn
-  const authClient = createAuthClient();
   const googleSignIn = async () => {
     const data = await authClient.signIn.social({
       provider: "google",
