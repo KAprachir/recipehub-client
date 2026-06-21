@@ -30,14 +30,16 @@ export default function FilterSidebar({ currentFilters }) {
   const searchParams = useSearchParams();
 
   // Local States initialized from URL params
-  const [category, setCategory] = useState(currentFilters.category || "");
+  const [categories, setCategories] = useState(
+    currentFilters.category ? currentFilters.category.split(",") : []
+  );
   const [cuisine, setCuisine] = useState(currentFilters.cuisine || "All Cuisines");
   const [difficulty, setDifficulty] = useState(currentFilters.difficulty || "");
   const [maxTime, setMaxTime] = useState(currentFilters.maxTime || 60);
 
   // Sync state with URL params when they change (e.g. back navigation or external updates)
   useEffect(() => {
-    setCategory(currentFilters.category || "");
+    setCategories(currentFilters.category ? currentFilters.category.split(",") : []);
     setCuisine(currentFilters.cuisine || "All Cuisines");
     setDifficulty(currentFilters.difficulty || "");
     setMaxTime(currentFilters.maxTime || 60);
@@ -55,7 +57,7 @@ export default function FilterSidebar({ currentFilters }) {
   };
 
   const handleClearAll = () => {
-    setCategory("");
+    setCategories([]);
     setCuisine("All Cuisines");
     setDifficulty("");
     setMaxTime(60);
@@ -89,22 +91,27 @@ export default function FilterSidebar({ currentFilters }) {
             >
               <input
                 type="checkbox"
-                checked={category === cat}
+                checked={categories.includes(cat)}
                 onChange={(e) => {
-                  const val = e.target.checked ? cat : "";
-                  setCategory(val);
-                  updateQueryParams("category", val);
+                  let updated;
+                  if (e.target.checked) {
+                    updated = [...categories, cat];
+                  } else {
+                    updated = categories.filter((c) => c !== cat);
+                  }
+                  setCategories(updated);
+                  updateQueryParams("category", updated.join(","));
                 }}
                 className="sr-only"
               />
               <div
                 className={`w-5 h-5 border rounded-md flex items-center justify-center transition-all text-white ${
-                  category === cat
+                  categories.includes(cat)
                     ? "bg-emerald-600 border-emerald-600"
                     : "bg-white border-zinc-300 group-hover:border-zinc-400 dark:bg-zinc-950 dark:border-zinc-800 dark:group-hover:border-zinc-600"
                 }`}
               >
-                {category === cat && (
+                {categories.includes(cat) && (
                   <svg
                     className="w-3 h-3"
                     fill="none"

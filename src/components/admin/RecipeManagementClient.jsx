@@ -12,11 +12,12 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { deleteRecipe } from "@/lib/actions/recipes";
+import { toggleFeatureRecipe, updateRecipeAdmin } from "@/lib/actions/admin";
 
 export default function RecipeManagementClient({ summaryData }) {
   const [recipes, setRecipes] = useState(summaryData?.recipes || []);
 
-  // ১. Feature / Unfeature Recipe Toggle Handler
+  // 1. Feature / Unfeature Recipe Toggle Handler
   const handleToggleFeature = async (
     recipeId,
     currentFeaturedState,
@@ -30,12 +31,12 @@ export default function RecipeManagementClient({ summaryData }) {
         ),
       );
 
-      // ব্যাকএন্ডের PATCH API কল করার জায়গা
-      // await fetch(`/api/admin/recipes/${recipeId}/feature`, { method: 'PATCH', body: JSON.stringify({ isFeatured: nextState }) });
+      // Call the live admin endpoint
+      await toggleFeatureRecipe(recipeId, nextState);
 
       Swal.fire({
         title: nextState ? "Added to Featured! ⭐" : "Removed from Featured",
-        text: `"${recipeName}" স্ট্যাটাস আপডেট হয়েছে।`,
+        text: `"${recipeName}" featured status has been updated.`,
         icon: "success",
         toast: true,
         position: "top-end",
@@ -54,7 +55,79 @@ export default function RecipeManagementClient({ summaryData }) {
     }
   };
 
-  // ২. Delete Recipe Handler
+  // 2. Edit Recipe Handler
+  const handleEditRecipe = (recipe) => {
+    Swal.fire({
+      title: "Edit Recipe Details",
+      html: `
+        <div class="flex flex-col gap-3 text-left">
+          <div>
+            <label class="text-xs font-bold text-zinc-500">Recipe Name</label>
+            <input id="swal-recipe-name" class="w-full mt-1 p-2 border border-zinc-300 dark:border-zinc-750 rounded-lg bg-transparent text-sm" value="${recipe.recipeName}">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-zinc-500">Category</label>
+            <select id="swal-recipe-category" class="w-full mt-1 p-2 border border-zinc-300 dark:border-zinc-750 rounded-lg bg-white dark:bg-zinc-900 text-sm">
+              <option value="Main Course" ${recipe.category === 'Main Course' ? 'selected' : ''}>Main Course</option>
+              <option value="Breakfast" ${recipe.category === 'Breakfast' ? 'selected' : ''}>Breakfast</option>
+              <option value="Dessert" ${recipe.category === 'Dessert' ? 'selected' : ''}>Dessert</option>
+              <option value="Appetizer" ${recipe.category === 'Appetizer' ? 'selected' : ''}>Appetizer</option>
+              <option value="Salad" ${recipe.category === 'Salad' ? 'selected' : ''}>Salad</option>
+              <option value="Beverage" ${recipe.category === 'Beverage' ? 'selected' : ''}>Beverage</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-zinc-500">Cuisine</label>
+            <select id="swal-recipe-cuisine" class="w-full mt-1 p-2 border border-zinc-300 dark:border-zinc-750 rounded-lg bg-white dark:bg-zinc-900 text-sm">
+              <option value="Italian" ${recipe.cuisineType === 'Italian' ? 'selected' : ''}>Italian</option>
+              <option value="Mexican" ${recipe.cuisineType === 'Mexican' ? 'selected' : ''}>Mexican</option>
+              <option value="Indian" ${recipe.cuisineType === 'Indian' ? 'selected' : ''}>Indian</option>
+              <option value="Chinese" ${recipe.cuisineType === 'Chinese' ? 'selected' : ''}>Chinese</option>
+              <option value="American" ${recipe.cuisineType === 'American' ? 'selected' : ''}>American</option>
+              <option value="Bengali" ${recipe.cuisineType === 'Bengali' ? 'selected' : ''}>Bengali</option>
+              <option value="Thai" ${recipe.cuisineType === 'Thai' ? 'selected' : ''}>Thai</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-zinc-500">Prep Time (minutes)</label>
+            <input type="number" id="swal-recipe-preptime" class="w-full mt-1 p-2 border border-zinc-300 dark:border-zinc-750 rounded-lg bg-transparent text-sm" value="${recipe.preparationTime}">
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Save Changes",
+      confirmButtonColor: "#10B981",
+      preConfirm: () => {
+        const recipeName = document.getElementById("swal-recipe-name").value;
+        const category = document.getElementById("swal-recipe-category").value;
+        const cuisineType = document.getElementById("swal-recipe-cuisine").value;
+        const preparationTime = parseInt(document.getElementById("swal-recipe-preptime").value);
+
+        if (!recipeName || isNaN(preparationTime)) {
+          Swal.showValidationMessage("Please fill out all fields with valid data");
+          return false;
+        }
+
+        return { recipeName, category, cuisineType, preparationTime };
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await updateRecipeAdmin(recipe._id, result.value);
+          setRecipes((prev) =>
+            prev.map((rec) =>
+              rec._id === recipe._id ? { ...rec, ...result.value } : rec
+            )
+          );
+          Swal.fire("Updated!", "Recipe has been updated successfully.", "success");
+        } catch (error) {
+          Swal.fire("Error", "Failed to update recipe.", "error");
+        }
+      }
+    });
+  };
+
+  // 3. Delete Recipe Handler
   const handleDeleteRecipe = (recipeId, recipeName) => {
     Swal.fire({
       title: `Delete "${recipeName}"?`,
@@ -231,6 +304,7 @@ export default function RecipeManagementClient({ summaryData }) {
                         variant="light"
                         isIconOnly
                         size="sm"
+                        onClick={() => handleEditRecipe(recipe)}
                         className="text-zinc-400 hover:text-zinc-700"
                       >
                         <Edit2 size={14} />

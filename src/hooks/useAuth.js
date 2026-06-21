@@ -10,7 +10,12 @@ export const useAuth = () => {
 
   // অন্য কম্পোনেন্টে ব্যবহারের জন্য ডাটাগুলো রিটার্ন করা হলো
   return {
-    user: session?.user, // ইউজারের নাম, ইমেইল, রোল, ইমেজ ইত্যাদি থাকবে এখানে
+    user: session?.user
+      ? {
+          ...session.user,
+          isPremium: session.user.role === "premium",
+        }
+      : null, // ইউজারের নাম, ইমেইল, রোল, ইমেজ ইত্যাদি থাকবে এখানে
     session: session, // ফুল সেশন অবজেক্ট
     loading: isPending, // ডাটা লোড হচ্ছে কিনা ট্র্যাকিং করার জন্য
     error: error // কোনো এরর থাকলে তা ধরার জন্য

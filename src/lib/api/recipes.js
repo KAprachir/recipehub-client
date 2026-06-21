@@ -7,7 +7,7 @@ export async function getAdminRecipesData () {
 
 // Get Recipes: Query recipes dynamically with filters (page, category, cuisine, etc.)
 export const getRecipes = async filters => {
-  const { page, category, cuisine, difficulty, maxTime, sortBy } = filters
+  const { page, category, cuisine, difficulty, maxTime, sortBy, isFeatured } = filters
 
   const params = new URLSearchParams()
   if (page) params.append('page', page)
@@ -16,6 +16,7 @@ export const getRecipes = async filters => {
   if (difficulty) params.append('difficulty', difficulty)
   if (maxTime) params.append('maxTime', maxTime)
   if (sortBy) params.append('sortBy', sortBy)
+  if (isFeatured !== undefined) params.append('isFeatured', isFeatured)
 
   return serverFetch(`/api/recipes?${params.toString()}`, {
     cache: 'no-store'

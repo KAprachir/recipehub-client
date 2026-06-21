@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import React from "react";
 import FilterSidebar from "@/components/recipes/FilterSidebar";
 import BrowseRecipeCard from "@/components/cards/BrowseRecipeCard";

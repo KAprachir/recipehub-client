@@ -13,16 +13,20 @@ import {
   CheckCircle2,
   Lightbulb,
   FileText,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserFavorites } from "@/lib/api/user";
-import { toggleFavoriteRecipe } from "@/lib/actions/recipes";
+import { getUserPurchasedRecipes } from "@/lib/api/recipes";
+import { toggleFavoriteRecipe, likeRecipe, reportRecipe } from "@/lib/actions/recipes";
 
 export default function RecipeDetailsClient({ recipe }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
+  const [likesCount, setLikesCount] = useState(recipe?.likesCount || 0);
+  
   // Check active user authentication state
   const { user } = useAuth();
 
@@ -42,6 +46,24 @@ export default function RecipeDetailsClient({ recipe }) {
         }
       };
       loadFavoriteStatus();
+    }
+  }, [user, recipe?._id]);
+
+  // Load user's purchased status on page mount
+  useEffect(() => {
+    if (user && recipe?._id) {
+      const loadPurchasedStatus = async () => {
+        try {
+          const purchased = await getUserPurchasedRecipes();
+          if (Array.isArray(purchased)) {
+            const isPurchased = purchased.some((p) => p._id === recipe._id);
+            setHasPurchased(isPurchased);
+          }
+        } catch (error) {
+          console.error("Failed to load purchased status:", error);
+        }
+      };
+      loadPurchasedStatus();
     }
   }, [user, recipe?._id]);
 
@@ -91,45 +113,139 @@ export default function RecipeDetailsClient({ recipe }) {
     }
   };
 
-  const handlePurchase = () => {
-    Swal.fire({
-      title: "Redirecting to Stripe...",
-      text: `Securing payment for ${recipe.recipeName}`,
-      icon: "info",
-      showConfirmButton: false,
-      timer: 1500,
-    }).then(() => {
-      setHasPurchased(true);
-      Swal.fire(
-        "Unlocked 🎉",
-        "You now have lifetime access to this recipe!",
-        "success",
-      );
-    });
+  // Like Recipe Handler: Increments community like counter
+  const handleLikeClick = async () => {
+    if (!user) {
+      Swal.fire({
+        title: "Please Log In",
+        text: "You need to be logged in to like recipes.",
+        icon: "warning",
+        confirmButtonColor: "#00693E",
+      });
+      return;
+    }
+
+    try {
+      const response = await likeRecipe(recipe._id);
+      if (response.likesCount !== undefined) {
+        setLikesCount(response.likesCount);
+        Swal.fire({
+          title: "Liked! ❤️",
+          text: "Recipe liked successfully.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error liking recipe:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to like recipe. Please try again.",
+        icon: "error",
+      });
+    }
   };
 
+  // Purchase Recipe Handler: Initiates Stripe Checkout session redirection
+  const handlePurchase = async () => {
+    if (!user) {
+      Swal.fire({
+        title: "Please Log In",
+        text: "You need to be logged in to purchase recipes.",
+        icon: "warning",
+        confirmButtonColor: "#00693E",
+      });
+      return;
+    }
+
+    try {
+      Swal.fire({
+        title: "Redirecting to Stripe...",
+        text: `Securing payment gateway for ${recipe.recipeName}`,
+        icon: "info",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const res = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          recipeId: recipe._id,
+          recipeName: recipe.recipeName,
+          price: recipe.price || 4.99
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to create Stripe session");
+      }
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No redirect url returned");
+      }
+    } catch (error) {
+      console.error("Purchase error:", error);
+      Swal.fire({
+        title: "Purchase Failed",
+        text: "Could not establish secure payment link. Please try again later.",
+        icon: "error"
+      });
+    }
+  };
+
+  // Report Recipe Handler: Submits moderation ticket
   const handleReport = () => {
+    if (!user) {
+      Swal.fire({
+        title: "Please Log In",
+        text: "You need to be logged in to report recipes.",
+        icon: "warning",
+        confirmButtonColor: "#00693E",
+      });
+      return;
+    }
+
     Swal.fire({
       title: "Report Recipe",
       input: "select",
       inputOptions: {
-        spam: "Spam",
-        offensive: "Offensive Content",
-        copyright: "Copyright Issue",
+        "Spam": "Spam",
+        "Offensive Content": "Offensive Content",
+        "Copyright Issue": "Copyright Issue",
       },
       inputPlaceholder: "Select a reason",
       showCancelButton: true,
       confirmButtonColor: "#EF4444",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire(
-          "Report Received",
-          "Thank you. Admin will moderate this content shortly.",
-          "success",
-        );
+    }).then(async (result) => {
+      if (result.isConfirmed && result.value) {
+        try {
+          await reportRecipe(recipe._id, recipe.recipeName, result.value);
+          Swal.fire(
+            "Report Received",
+            "Thank you. Admin will moderate this content shortly.",
+            "success",
+          );
+        } catch (err) {
+          console.error("Report error:", err);
+          Swal.fire("Error", "Failed to submit report. Please try again.", "error");
+        }
       }
     });
   };
+
+  const isAuthor = user && (user.id === recipe.authorId || user._id?.toString() === recipe.authorId);
+  const hasAccess = hasPurchased || isAuthor || user?.role === 'admin';
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8 bg-zinc-50/50 dark:bg-zinc-950/20 text-zinc-800 dark:text-zinc-200 min-h-screen">
@@ -188,7 +304,7 @@ export default function RecipeDetailsClient({ recipe }) {
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/40">
               <Heart size={14} className="fill-red-500 text-red-500" />
-              <span>{recipe.likesCount || 0}</span>
+              <span>{likesCount}</span>
             </div>
           </div>
 
@@ -242,26 +358,36 @@ export default function RecipeDetailsClient({ recipe }) {
           <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <Button
               onClick={handlePurchase}
-              disabled={hasPurchased}
+              disabled={hasAccess}
               className={`w-full font-bold py-6 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all ${
-                hasPurchased
+                hasAccess
                   ? "bg-zinc-100 dark:bg-zinc-800 text-emerald-600 cursor-default"
                   : "bg-[#00693E] hover:bg-[#005230] text-white"
               }`}
             >
-              {hasPurchased ? (
+              {hasAccess ? (
                 <CheckCircle2 size={16} />
               ) : (
                 <ShoppingBag size={16} />
               )}
               <span>
-                {hasPurchased
-                  ? "Recipe Unlocked"
+                {hasAccess
+                  ? isAuthor
+                    ? "Author Access Unlocked"
+                    : "Recipe Unlocked"
                   : `Unlock Premium Recipe — $${recipe.price || "4.99"}`}
               </span>
             </Button>
 
             <div className="flex gap-2">
+              <Button
+                variant="bordered"
+                onClick={handleLikeClick}
+                className="flex-1 font-bold py-6 border-zinc-200 dark:border-zinc-700 rounded-xl transition-all hover:bg-rose-50/50 hover:text-rose-500 hover:border-rose-200"
+              >
+                <Heart size={16} className="text-rose-500 fill-rose-500/20" />
+                <span>Like</span>
+              </Button>
               <Button
                 variant="bordered"
                 onClick={handleFavoriteToggle}
@@ -324,36 +450,67 @@ export default function RecipeDetailsClient({ recipe }) {
         </div>
 
         {/* Instructions Steps Loop */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 relative">
           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-500 font-extrabold border-b border-zinc-200/60 pb-3">
             <FileText size={18} />{" "}
             <h2 className="text-base uppercase tracking-wide">
               Culinary Instructions
             </h2>
           </div>
-          <div className="flex flex-col space-y-6 relative pl-4 border-l border-dashed border-zinc-200 dark:border-zinc-800">
-            {/* If instructions is stored as an array of objects or single block text string */}
-            {Array.isArray(recipe.instructions) ? (
-              recipe.instructions.map((inst, index) => (
-                <div key={index} className="space-y-3 relative group">
-                  <span className="absolute -left-[27px] top-0.5 w-6 h-6 rounded-full bg-[#00693E] text-white text-xs font-black flex items-center justify-center shadow-xs">
-                    {inst.step || index + 1}
-                  </span>
-                  <div className="space-y-1">
-                    {inst.title && (
-                      <h3 className="text-base font-extrabold text-zinc-800 dark:text-zinc-100 tracking-tight">
-                        {inst.title}
-                      </h3>
-                    )}
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-                      {inst.description || inst}
-                    </p>
+          
+          <div className="relative">
+            {hasAccess ? (
+              <div className="flex flex-col space-y-6 relative pl-4 border-l border-dashed border-zinc-200 dark:border-zinc-800">
+                {Array.isArray(recipe.instructions) ? (
+                  recipe.instructions.map((inst, index) => (
+                    <div key={index} className="space-y-3 relative group">
+                      <span className="absolute -left-[27px] top-0.5 w-6 h-6 rounded-full bg-[#00693E] text-white text-xs font-black flex items-center justify-center shadow-xs">
+                        {inst.step || index + 1}
+                      </span>
+                      <div className="space-y-1">
+                        {inst.title && (
+                          <h3 className="text-base font-extrabold text-zinc-800 dark:text-zinc-100 tracking-tight">
+                            {inst.title}
+                          </h3>
+                        )}
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                          {inst.description || inst}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
+                    {recipe.instructions}
                   </div>
-                </div>
-              ))
+                )}
+              </div>
             ) : (
-              <div className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-line">
-                {recipe.instructions}
+              <div className="relative rounded-3xl overflow-hidden p-6 border border-zinc-200/60 dark:border-zinc-800 bg-white/40 dark:bg-zinc-950/20 backdrop-blur-xs min-h-[250px] flex flex-col items-center justify-center text-center">
+                <div className="absolute inset-0 filter blur-md opacity-20 select-none pointer-events-none p-4 flex flex-col gap-4 text-left">
+                  <div className="h-4 bg-zinc-400 rounded-md w-1/3" />
+                  <div className="h-3 bg-zinc-300 rounded-md w-full" />
+                  <div className="h-3 bg-zinc-300 rounded-md w-5/6" />
+                  <div className="h-4 bg-zinc-400 rounded-md w-1/4 mt-4" />
+                  <div className="h-3 bg-zinc-300 rounded-md w-full" />
+                </div>
+                <div className="relative z-10 space-y-4 max-w-sm">
+                  <div className="mx-auto w-12 h-12 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-500 border border-amber-200 dark:border-amber-900 rounded-2xl flex items-center justify-center shadow-xs">
+                    <ShoppingBag size={22} className="stroke-[2.25]" />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-200">
+                    Premium Recipe Locked
+                  </h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    This recipe contains exclusive culinary details. Unlock it above with a secure payment via Stripe to access full step-by-step instructions.
+                  </p>
+                  <Button
+                    onClick={handlePurchase}
+                    className="bg-[#00693E] hover:bg-[#005230] text-white font-bold rounded-xl px-6 h-10 text-xs uppercase tracking-wider shadow-sm"
+                  >
+                    Unlock Recipe
+                  </Button>
+                </div>
               </div>
             )}
           </div>

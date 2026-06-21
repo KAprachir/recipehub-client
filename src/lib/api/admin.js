@@ -9,3 +9,9 @@ export const getAdminDashboardSummary = async () => {
 export const getAdminReports = async () => {
   return serverFetch('/api/admin/reports', { cache: 'no-store' })
 }
+
+// Get Admin Transactions: Fetch all payment transaction records
+export const getAdminTransactions = async () => {
+  return serverFetch('/api/admin/transactions', { cache: 'no-store' })
+}
+

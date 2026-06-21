@@ -14,3 +14,20 @@ export const takeDownRecipe = async id => {
 export const runDiagnostics = async () => {
   return serverMutation('/api/admin/diagnostics/run', {}, 'POST')
 }
+
+// Toggle Feature Recipe: Admins can feature or unfeature recipes
+export const toggleFeatureRecipe = async (id, isFeatured) => {
+  return serverMutation(`/api/admin/recipes/${id}/feature`, { isFeatured }, 'PATCH')
+}
+
+// Update Recipe Admin: Admins can edit recipe metadata
+export const updateRecipeAdmin = async (id, recipeData) => {
+  return serverMutation(`/api/admin/recipes/${id}`, recipeData, 'PATCH')
+}
+
+// Update User Status: Block or unblock a user
+export const updateUserStatus = async (id, status) => {
+  return serverMutation(`/api/admin/users/${id}/status`, { status }, 'PATCH')
+}
+
+

@@ -28,9 +28,15 @@ export default function LoginPage() {
   // google signIn
   const authClient = createAuthClient();
   const googleSignIn = async () => {
-    const data = await authClient.signIn.social({
-      provider: "google",
-    });
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: window.location.origin + "/",
+      });
+    } catch (err) {
+      console.error("Google Sign-In Error:", err);
+      setError("Failed to initiate Google login. Please try again.");
+    }
   };
 
   const handleSubmit = async (e) => {

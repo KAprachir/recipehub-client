@@ -1,4 +1,5 @@
-// এখানে কিন্তু 'use client' থাকবে না, এটি একটি Server Component
+export const dynamic = 'force-dynamic';
+
 import { getUserSession } from "@/lib/core/session";
 import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";

@@ -11,6 +11,7 @@ import {
   PenTool,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import { updateProfile } from "@/lib/actions/user";
 
 export default function ProfileClient({ user }) {
   // ফর্ম স্টেটসমূহ (ডাটাবেজ থেকে আসা ভ্যালু ডিফল্ট হিসেবে সেট হবে)
@@ -42,7 +43,7 @@ export default function ProfileClient({ user }) {
       const payload = { displayName, profileUrl: image };
 
       // এখানে আপনার সার্ভার অ্যাকশন বা serverMutation কল হবে
-      // const res = await updateProfile(payload);
+      await updateProfile(payload);
 
       Swal.fire("Success 🎉", "Profile updated successfully!", "success");
     } catch (error) {

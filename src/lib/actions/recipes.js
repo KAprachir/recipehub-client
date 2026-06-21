@@ -14,3 +14,14 @@ export const deleteRecipe = async id => {
 export const toggleFavoriteRecipe = async (id) => {
   return serverMutation(`/api/recipes/${id}/favorite`, {}, 'POST')
 }
+
+// Like Recipe: Increments the likes count of a recipe by 1 in the database
+export const likeRecipe = async (id) => {
+  return serverMutation(`/api/recipes/${id}/like`, {}, 'POST')
+}
+
+// Report Recipe: Submits a recipe moderation report containing reason
+export const reportRecipe = async (recipeId, recipeName, reason) => {
+  return serverMutation('/api/reports', { recipeId, recipeName, reason }, 'POST')
+}
+

@@ -93,7 +93,7 @@ export default function MyRecipesPage() {
   // 💡 SERVER INTEGRATION STEP 5:
   // Compute metric numbers dynamically from your fetched database state.
   const totalPublished = recipes.filter((r) => r.status === "Published").length;
-  const totalDrafts = recipes.filter((r) => r.status === "Drafting").length;
+  const totalDrafts = recipes.filter((r) => r.status === "Draft").length;
 
   // Summing up total likes/saves to show total culinary impact
   const totalSaves = recipes.reduce(

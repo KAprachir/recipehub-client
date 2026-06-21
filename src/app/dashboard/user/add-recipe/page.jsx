@@ -209,6 +209,14 @@ export default function AddRecipePage() {
     }
   };
 
+  const handleUpgradeToPremium = () => {
+    const form = document.createElement("form");
+    form.action = "/api/checkout_sessions";
+    form.method = "POST";
+    document.body.appendChild(form);
+    form.submit();
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-6 text-zinc-800 dark:text-zinc-200">
       {/* ─── HEADER AREA ─── */}
@@ -222,7 +230,7 @@ export default function AddRecipePage() {
           </p>
         </div>
 
-        {!user?.isPremium && (
+        {user?.role !== "premium" && user?.role !== "admin" && (
           <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3 rounded-xl max-w-sm">
             <AlertTriangle
               className="text-amber-600 dark:text-amber-500 shrink-0 mt-0.5"
@@ -230,7 +238,10 @@ export default function AddRecipePage() {
             />
             <p className="text-xs text-amber-800 dark:text-amber-400 font-medium leading-relaxed">
               Normal users can add up to 2 recipes.{" "}
-              <span className="font-bold underline cursor-pointer hover:text-amber-600">
+              <span 
+                onClick={handleUpgradeToPremium}
+                className="font-bold underline cursor-pointer hover:text-amber-600"
+              >
                 Upgrade to Premium
               </span>{" "}
               for unlimited access.

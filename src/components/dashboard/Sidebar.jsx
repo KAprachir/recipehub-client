@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Button } from "@heroui/react"; // Using latest Hero UI components
 import { authClient } from "@/lib/auth-client";
+import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -60,13 +61,16 @@ export default function Sidebar({ role, user, onClose }) {
     <div className="h-full flex flex-col justify-between p-4 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 select-none">
       {/* ─── TOP SECTION ─── */}
       <div className="space-y-6">
-        {/* Logo Block */}
-        <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2 px-2 pt-2 cursor-pointer">
-          {!isAdmin && <Utensils className="text-[#046A38]" size={24} />}
-          <span className="text-xl font-bold text-[#046A38] tracking-tight">
-            RecipeHub
-          </span>
-        </Link>
+        {/* Logo Block & Theme Toggle */}
+        <div className="flex items-center justify-between px-2 pt-2">
+          <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2 cursor-pointer">
+            {!isAdmin && <Utensils className="text-[#046A38]" size={24} />}
+            <span className="text-xl font-bold text-[#046A38] tracking-tight">
+              RecipeHub
+            </span>
+          </Link>
+          <ThemeSwitcher />
+        </div>
 
         {/* ADMIN SPECIFIC: Profile card at the top */}
         {isAdmin && (

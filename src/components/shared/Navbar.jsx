@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button, Spinner } from "@heroui/react";
 import { LogOut, ChefHat, Menu, X } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
+import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -81,6 +82,7 @@ const Navbar = () => {
 
         {/* Right Section: Dynamic Target Area */}
         <div className="flex items-center gap-3">
+          <ThemeSwitcher />
           {isPending ? (
             /* Prevent Layout Flashing while verifying auth state */
             <div className="h-10 px-4 flex items-center">

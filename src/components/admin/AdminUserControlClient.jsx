@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Avatar, Button } from "@heroui/react";
 import { ShieldAlert, UserCheck, ShieldX } from "lucide-react";
 import Swal from "sweetalert2";
+import { updateUserStatus } from "@/lib/actions/admin";
 
 // ডাটাবেজ থেকে ডাটা লোড না হওয়া পর্যন্ত ব্যাকআপ হিসেবে ডেমো ডাটা (ইমেজের হুবহু ডাটা)
 const MOCK_USERS = [
@@ -49,9 +50,8 @@ export default function AdminUserControlClient({ initialUsers }) {
     initialUsers?.length > 0 ? initialUsers : MOCK_USERS,
   );
 
-  // ইউজার ব্লক/আনব্লক করার অ্যাকশন মেথড
   const handleToggleStatus = async (userId, currentStatus, userName) => {
-    const isBlocking = currentStatus === "Active";
+    const isBlocking = currentStatus !== "Blocked";
 
     Swal.fire({
       title: isBlocking ? `Block ${userName}?` : `Unblock ${userName}?`,
@@ -67,8 +67,8 @@ export default function AdminUserControlClient({ initialUsers }) {
         try {
           const newStatus = isBlocking ? "Blocked" : "Active";
 
-          // ব্যাকএন্ডে PATCH/PUT রিকোয়েস্ট পাঠানোর জায়গা
-          // await fetch(`/api/users/${userId}/status`, { method: "PATCH", body: JSON.stringify({ status: newStatus }) });
+          // Back-end status update
+          await updateUserStatus(userId, newStatus);
 
           // অপটিমিস্টিক স্টেট আপডেট (ডাটা সাথে সাথে স্ক্রিনে বদলে যাবে)
           setUsers((prevUsers) =>
@@ -129,7 +129,7 @@ export default function AdminUserControlClient({ initialUsers }) {
           {/* Table Body Section */}
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
             {users.map((user) => {
-              const isActive = user.status === "Active";
+              const isActive = user.status !== "Blocked";
 
               return (
                 <tr
@@ -180,7 +180,7 @@ export default function AdminUserControlClient({ initialUsers }) {
                       <span
                         className={`text-sm font-bold ${isActive ? "text-emerald-700 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
                       >
-                        {user.status}
+                        {user.status || "Active"}
                       </span>
                     </div>
                   </td>
