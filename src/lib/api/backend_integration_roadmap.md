@@ -4,45 +4,45 @@ Follow this sequence to systematically connect your frontend client pages to you
 
 ---
 
-## 🗺️ Step 1: Ensure Authentication & Session Security (Base Setup)
+## 🗺️ Step 1: Ensure Authentication & Session Security (Base Setup) (Completed)
 Before writing database queries, make sure your backend server can verify who is logged in.
-1. Make sure `better-auth` or your custom token headers are decoded successfully on the server.
-2. Ensure you can extract the active user ID (`req.user.id` or `req.user._id`) from requests that send authentication headers.
+- [x] Make sure `better-auth` or your custom token headers are decoded successfully on the server.
+- [x] Ensure you can extract the active user ID (`req.user.id` or `req.user._id`) from requests that send authentication headers.
 
 ---
 
-## 🗺️ Step 2: Implement User Recipes Portfolio (Medium Priority)
+## 🗺️ Step 2: Implement User Recipes Portfolio (Medium Priority) (Completed)
 This is the best place to start database interactions since you already have recipes in MongoDB.
 
 ### 1. Backend Server Endpoints
-- Implement **`GET /api/user/my-recipes`**: Query `db.collection('recipes').find({ userId: req.user.id })`.
-- Implement **`DELETE /api/recipes/:id`**: Query `db.collection('recipes').deleteOne({ _id: req.params.id })`.
+- [x] Implement **`GET /api/user/my-recipes`**: Query `db.collection('recipes').find({ userId: req.user.id })`.
+- [x] Implement **`DELETE /api/recipes/:id`**: Query `db.collection('recipes').deleteOne({ _id: req.params.id })`.
 
 ### 2. Client API Blueprint
-- Go to `src/lib/api/recipes.js` and uncomment the code inside `getUserRecipes`.
-- Go to `src/lib/actions/recipes.js` and uncomment the code inside `deleteRecipe`.
+- [x] Go to `src/lib/api/recipes.js` and uncomment the code inside `getUserRecipes`.
+- [x] Go to `src/lib/actions/recipes.js` and uncomment the code inside `deleteRecipe`.
 
 ### 3. Frontend Page Connection
-- Go to `src/app/dashboard/user/my-recipes/page.jsx`.
-- Uncomment the two imports at the top: `getUserRecipes` and `deleteRecipe`.
-- Replace the mock data setting inside `useEffect` and `handleDeleteRecipe` with the calls to those functions.
+- [x] Go to `src/app/dashboard/user/my-recipes/page.jsx`.
+- [x] Uncomment the two imports at the top: `getUserRecipes` and `deleteRecipe`.
+- [x] Replace the mock data setting inside `useEffect` and `handleDeleteRecipe` with the calls to those functions.
 
 ---
 
-## 🗺️ Step 3: Implement Favorites System (Medium Priority)
+## 🗺️ Step 3: Implement Favorites System (Medium Priority) (Completed)
 
 ### 1. Backend Server Endpoints
-- Implement **`POST /api/recipes/:id/favorite`**: Check if user already favorited the recipe. If yes, remove it; if no, insert the user-recipe pairing into `favorites` collection.
-- Implement **`GET /api/user/favorites`**: Query `favorites` collection, extract recipe IDs, and find matching records in the `recipes` collection.
+- [x] Implement **`POST /api/recipes/:id/favorite`**: Check if user already favorited the recipe. If yes, remove it; if no, insert the user-recipe pairing into `favorites` collection.
+- [x] Implement **`GET /api/user/favorites`**: Query `favorites` collection, extract recipe IDs, and find matching records in the `recipes` collection.
 
 ### 2. Client API Blueprint
-- Go to `src/lib/api/user.js` and uncomment the code inside `getUserFavorites`.
-- Go to `src/lib/actions/recipes.js` and uncomment the code inside `toggleFavoriteRecipe`.
+- [x] Go to `src/lib/api/user.js` and uncomment the code inside `getUserFavorites`.
+- [x] Go to `src/lib/actions/recipes.js` and uncomment the code inside `toggleFavoriteRecipe`.
 
 ### 3. Frontend Page Connection
-- Go to `src/app/dashboard/user/favorites/page.jsx`.
-- Uncomment the imports `getUserFavorites` and `toggleFavoriteRecipe`.
-- Update your mount `useEffect` and `handleRemoveFavorite` handler to use these functions.
+- [x] Go to `src/app/dashboard/user/favorites/page.jsx`.
+- [x] Uncomment the imports `getUserFavorites` and `toggleFavoriteRecipe`.
+- [x] Update your mount `useEffect` and `handleRemoveFavorite` handler to use these functions.
 
 ---
 

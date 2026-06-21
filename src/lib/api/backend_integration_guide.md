@@ -208,9 +208,9 @@ Here is how you can write helper functions to fetch data:
 ```javascript
 import { serverFetch } from '../core/server';
 
-// 💡 TO IMPLEMENT: Fetch recipes created by the current user
+// 💡 IMPLEMENTED: Fetch recipes created by the current user
 export const getUserRecipes = async () => {
-  // return serverFetch('/api/user/my-recipes', { cache: 'no-store' });
+  return serverFetch('/api/user/my-recipes', { cache: 'no-store' });
 };
 
 // 💡 TO IMPLEMENT: Fetch purchased recipes
@@ -228,9 +228,9 @@ export const getUserDashboardSummary = async () => {
   // return serverFetch('/api/user/dashboard-summary', { cache: 'no-store' });
 };
 
-// 💡 TO IMPLEMENT: Fetch favorite recipes
+// 💡 IMPLEMENTED: Fetch favorite recipes
 export const getUserFavorites = async () => {
-  // return serverFetch('/api/user/favorites', { cache: 'no-store' });
+  return serverFetch('/api/user/favorites', { cache: 'no-store' });
 };
 ```
 
@@ -239,14 +239,14 @@ For actions that change database state (mutations), use `serverMutation`:
 ```javascript
 import { serverMutation } from '../core/server';
 
-// 💡 TO IMPLEMENT: Delete a recipe
+// 💡 IMPLEMENTED: Delete a recipe
 export const deleteRecipe = async (id) => {
-  // return serverMutation(`/api/recipes/${id}`, {}, 'DELETE');
+  return serverMutation(`/api/recipes/${id}`, {}, 'DELETE');
 };
 
-// 💡 TO IMPLEMENT: Toggle favorite on a recipe
+// 💡 IMPLEMENTED: Toggle favorite on a recipe
 export const toggleFavoriteRecipe = async (id) => {
-  // return serverMutation(`/api/recipes/${id}/favorite`, {}, 'POST');
+  return serverMutation(`/api/recipes/${id}/favorite`, {}, 'POST');
 };
 ```
 
