@@ -6,11 +6,11 @@ import { ChefHat } from "lucide-react";
 export default function LoadingPage() {
   return (
     <main className="min-h-screen w-full flex flex-col flex-1 items-center justify-center p-4 bg-white dark:bg-neutral-950 antialiased selection:bg-[#046A38]/20 selection:text-[#046A38]">
-      {/* প্রধান কন্টেইনার */}
+      {/* Main container */}
       <div className="flex flex-col items-center justify-center space-y-6">
-        {/* ব্র্যান্ড লোগো সেকশন */}
+        {/* Brand logo section */}
         <div className="relative flex items-center justify-center">
-          {/* লোগোর পেছনের গ্লোয়িং পালস ইফেক্ট */}
+          {/* Glowing pulse effect behind the logo */}
           <div className="absolute w-20 h-20 rounded-3xl bg-[#046A38]/10 animate-pulse"></div>
 
           <div className="w-16 h-16 bg-[#046A38] text-white rounded-2xl flex items-center justify-center shadow-lg z-10">
@@ -18,7 +18,7 @@ export default function LoadingPage() {
           </div>
         </div>
 
-        {/* টেক্সট মেসেজ */}
+        {/* Text message */}
         <div className="flex flex-col items-center text-center space-y-1">
           <h1 className="text-lg font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
             Preparing Workspace
@@ -28,7 +28,7 @@ export default function LoadingPage() {
           </p>
         </div>
 
-        {/* এরর-মুক্ত স্ট্যান্ডার্ড CSS স্পিনার (যা আপনার সবুজ ব্র্যান্ড রঙের সাথে মিলবে) */}
+        {/* Standard CSS spinner matching green brand color */}
         <div className="pt-2">
           <div className="w-6 h-6 border-2 border-neutral-200 border-t-[#046A38] rounded-full animate-spin"></div>
         </div>

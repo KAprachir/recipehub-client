@@ -5,7 +5,7 @@ import { ShieldAlert, UserCheck, ShieldX } from "lucide-react";
 import Swal from "sweetalert2";
 import { updateUserStatus } from "@/lib/actions/admin";
 
-// ডাটাবেজ থেকে ডাটা লোড না হওয়া পর্যন্ত ব্যাকআপ হিসেবে ডেমো ডাটা (ইমেজের হুবহু ডাটা)
+// Mock data as backup until data is loaded from the database (identical structure)
 const MOCK_USERS = [
   {
     _id: "1",
@@ -70,7 +70,7 @@ export default function AdminUserControlClient({ initialUsers }) {
           // Back-end status update
           await updateUserStatus(userId, newStatus);
 
-          // অপটিমিস্টিক স্টেট আপডেট (ডাটা সাথে সাথে স্ক্রিনে বদলে যাবে)
+          // Optimistic state update (data will change on screen immediately)
           setUsers((prevUsers) =>
             prevUsers.map((user) =>
               user._id === userId ? { ...user, status: newStatus } : user,
@@ -89,7 +89,7 @@ export default function AdminUserControlClient({ initialUsers }) {
     });
   };
 
-  // রোল অনুযায়ী ডাইনামিক কালার চিপস জেনারেটর
+  // Dynamic color badge generator based on role
   const getRoleBadgeStyle = (role) => {
     switch (role?.toLowerCase()) {
       case "admin":

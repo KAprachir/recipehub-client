@@ -3,19 +3,19 @@ import { getUserSession } from "@/lib/core/session";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  // আপনার সার্ভার অ্যাকশন দিয়ে ইউজার সেশন চেক করা হচ্ছে
+  // Checking user session using server action
   const user = await getUserSession();
 
-  // ১. ইউজার যদি লগইন করা না থাকে, তবে তাকে সোজা লগইন পেজে পাঠান
+  // 1. If user is not logged in, redirect to login page
   if (!user) {
     redirect("/login");
   }
 
-  // ২. ইউজার যদি অ্যাডমিন (Admin) হয়, তবে অ্যাডমিন ওভারভিউতে পাঠান
+  // 2. If user is an Admin, redirect to admin overview
   if (user.role === "admin") {
     redirect("/dashboard/admin/overview");
   }
 
-  // ৩. ইউজার যদি সাধারণ বা প্রিমিয়াম ইউজার হয়, তবে ইউজার ওভারভিউতে পাঠান
+  // 3. If user is a general or premium user, redirect to user overview
   redirect("/dashboard/user/overview");
 }

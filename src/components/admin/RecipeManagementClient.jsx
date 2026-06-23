@@ -131,7 +131,7 @@ export default function RecipeManagementClient({ summaryData }) {
   const handleDeleteRecipe = (recipeId, recipeName) => {
     Swal.fire({
       title: `Delete "${recipeName}"?`,
-      text: "এটি মঙ্গোডিবি থেকে চিরতরে ডিলিট হয়ে যাবে!",
+      text: "This will be permanently deleted from MongoDB!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#EF4444",
@@ -139,7 +139,7 @@ export default function RecipeManagementClient({ summaryData }) {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // ব্যাকএন্ড ডিলিট API কল করার জায়গা
+          // Location to call backend delete API
           await deleteRecipe(recipeId);
 
           setRecipes((prev) => prev.filter((rec) => rec._id !== recipeId));
@@ -151,7 +151,7 @@ export default function RecipeManagementClient({ summaryData }) {
     });
   };
 
-  // ক্যাটাগরি চিপস স্টাইল ম্যাপিং
+  // Category chips style mapping
   const getCategoryChipStyle = (cat) => {
     switch (cat?.toLowerCase()) {
       case "seafood":

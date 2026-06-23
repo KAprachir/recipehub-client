@@ -54,7 +54,7 @@ export default function FilterSidebar({ currentFilters }) {
     } else {
       params.delete(key);
     }
-    params.set("page", "1"); // ফিল্টার চেঞ্জ হলে পেজ আবার ১ এ ফেরত যাবে
+    params.set("page", "1"); // If the filter changes, the page resets to 1
     router.push(`/recipes?${params.toString()}`);
   };
 

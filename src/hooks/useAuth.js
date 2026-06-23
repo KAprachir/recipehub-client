@@ -2,22 +2,22 @@
 
 import { authClient } from '@/lib/auth-client'
 
-// ধরি আপনার src/lib/auth-client.js ফাইলে Better-Auth এর ক্লায়েন্ট সেটআপ করা আছে
+// Assuming your Better-Auth client is set up in src/lib/auth-client.js
 
 export const useAuth = () => {
-  // Better-Auth এর অফিশিয়াল ক্লায়েন্ট হুক ব্যবহার করা হলো
+  // Official Better-Auth client hook is used
   const { data: session, isPending, error } = authClient.useSession()
 
-  // অন্য কম্পোনেন্টে ব্যবহারের জন্য ডাটাগুলো রিটার্ন করা হলো
+  // Return data for use in other components
   return {
     user: session?.user
       ? {
           ...session.user,
           isPremium: session.user.role === "premium",
         }
-      : null, // ইউজারের নাম, ইমেইল, রোল, ইমেজ ইত্যাদি থাকবে এখানে
-    session: session, // ফুল সেশন অবজেক্ট
-    loading: isPending, // ডাটা লোড হচ্ছে কিনা ট্র্যাকিং করার জন্য
-    error: error // কোনো এরর থাকলে তা ধরার জন্য
+      : null, // User's name, email, role, image etc. will be here
+    session: session, // Full session object
+    loading: isPending, // For tracking if data is loading
+    error: error // To catch any errors
   }
 }

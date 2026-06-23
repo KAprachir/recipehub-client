@@ -5,10 +5,10 @@ import FilterSidebar from "@/components/recipes/FilterSidebar";
 import BrowseRecipeCard from "@/components/cards/BrowseRecipeCard";
 import PaginationSection from "@/components/recipes/PaginationSection";
 import SortDropdown from "@/components/recipes/SortDropdown";
-import { getRecipes } from "@/lib/api/recipes"; // আপনার এক্সিস্টিং এপিআই ফাংশন
+import { getRecipes } from "@/lib/api/recipes"; // Your existing API function
 
 export default async function RecipesPage(props) {
-  // Next.js 15-এ searchParams প্রমিস আকারে আসে
+  // In Next.js 15, searchParams comes as a promise
   const searchParams = await props.searchParams;
 
   const currentPage = parseInt(searchParams.page) || 1;
@@ -18,7 +18,7 @@ export default async function RecipesPage(props) {
   const maxTime = searchParams.maxTime || "";
   const sortBy = searchParams.sortBy || "Newest";
 
-  // ফিল্টার অবজেক্টটি আপনার ব্যাকএন্ড এপিআই-তে পাস করা হচ্ছে
+  // The filter object is passed to your backend API
   const { recipes, totalCount } = await getRecipes({
     page: currentPage,
     category: selectedCategory,

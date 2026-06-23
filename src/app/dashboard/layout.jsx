@@ -5,10 +5,10 @@ import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 
 export default async function DashboardLayout({ children }) {
-  // আপনার বানানো ফাংশন দিয়ে সরাসরি সার্ভারেই সেশন চেক করা হচ্ছে
+  // Checking session directly on the server using custom function
   const user = await getUserSession();
 
-  // ইউজার লগইন করা না থাকলে সরাসরি লগইন পেজে রিডাইরেক্ট করবে
+  // Redirect to login page if user is not logged in
   if (!user) {
     redirect("/login");
   }

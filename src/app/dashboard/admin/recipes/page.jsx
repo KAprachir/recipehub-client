@@ -2,7 +2,7 @@ import React from "react";
 import RecipeManagementClient from "@/components/admin/RecipeManagementClient";
 import { getAdminRecipesData } from "@/lib/api/recipes";
 
-// ব্যাকএন্ড থেকে সব রেসিপি ডাটা একবারে তুলে আনার সিম্পল ফাংশন
+// Simple function to fetch all recipe data from backend at once
 
 export default async function RecipeManagementPage() {
   const summaryData = await getAdminRecipesData();
@@ -19,7 +19,7 @@ export default async function RecipeManagementPage() {
         </p>
       </div>
 
-      {/* ক্লায়েন্ট কম্পোনেন্টে ডাটা পাস করা হলো */}
+      {/* Data passed to Client Component */}
       <RecipeManagementClient summaryData={summaryData} />
     </div>
   );

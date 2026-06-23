@@ -5,7 +5,7 @@ import ProfileClient from "@/components/profile/ProfileClient";
 export default async function ProfilePage() {
   const user = await getUserSession();
 
-  // ইউজার সিকিউরিটি চেক
+  // User security check
   if (!user) {
     redirect("/login");
   }

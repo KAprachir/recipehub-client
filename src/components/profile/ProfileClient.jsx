@@ -14,7 +14,7 @@ import Swal from "sweetalert2";
 import { updateProfile } from "@/lib/actions/user";
 
 export default function ProfileClient({ user }) {
-  // ফর্ম স্টেটসমূহ (ডাটাবেজ থেকে আসা ভ্যালু ডিফল্ট হিসেবে সেট হবে)
+  // Form states (values from the database will be set as default)
   const [displayName, setDisplayName] = useState(
     user?.name || "Chef de Cuisine",
   );
@@ -23,7 +23,7 @@ export default function ProfileClient({ user }) {
   );
   const [isSaving, setIsSaving] = useState(false);
 
-  // রিসেট বা ডিসকার্ড হ্যান্ডলার
+  // Reset or discard handler
   const handleDiscard = () => {
     setDisplayName(user?.name || "Chef de Cuisine");
     setImage(user?.image || "https://example.com/your-avatar.jpg");
@@ -34,7 +34,7 @@ export default function ProfileClient({ user }) {
     );
   };
 
-  // ডাটা সেভ হ্যান্ডলার
+  // Save changes handler
   const handleSaveChanges = async (e) => {
     e.preventDefault();
     try {
@@ -42,7 +42,7 @@ export default function ProfileClient({ user }) {
 
       const payload = { displayName, profileUrl: image };
 
-      // এখানে আপনার সার্ভার অ্যাকশন বা serverMutation কল হবে
+      // Server action or server mutation will be called here
       await updateProfile(payload);
 
       Swal.fire("Success 🎉", "Profile updated successfully!", "success");

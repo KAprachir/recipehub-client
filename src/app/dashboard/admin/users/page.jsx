@@ -18,7 +18,7 @@ export default async function AdminUserControlPage() {
         </p>
       </div>
 
-      {/* ক্লায়েন্ট কম্পোনেন্টে ডাটা পাস করা হলো */}
+      {/* Data passed to Client Component */}
       <AdminUserControlClient initialUsers={initialUsers} />
     </div>
   );

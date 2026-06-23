@@ -3,13 +3,13 @@ import { getRecipeById } from "@/lib/api/recipes";
 import RecipeDetailsClient from "@/components/recipes/RecipeDetailsClient";
 
 export default async function RecipeDetailsPage({ params }) {
-  // ১. Next.js 15 এর নিয়ম অনুযায়ী প্রমিস থেকে আইডি আলাদা করা
+  // 1. Destructure ID from params promise per Next.js 15 rules
   const { id } = await params;
 
-  // ২. সার্ভার সাইড থেকে আইডি দিয়ে রেসিপি ডাটা তুলে আনা
+  // 2. Fetch recipe data from server side using ID
   const recipe = await getRecipeById(id);
 
-  // যদি ডাটাবেজে এই আইডির কোনো রেসিপি না থাকে
+  // If no recipe with this ID exists in the database
   if (!recipe) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -18,6 +18,6 @@ export default async function RecipeDetailsPage({ params }) {
     );
   }
 
-  // ৩. প্রাপ্ত রেসিপি ডাটা ক্লায়েন্ট ভিউ কম্পোনেন্টে প্রপস আকারে পাস করা
+  // 3. Pass the fetched recipe data to the client view component as props
   return <RecipeDetailsClient recipe={recipe} />;
 }
