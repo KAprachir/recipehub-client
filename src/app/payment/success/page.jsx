@@ -145,24 +145,47 @@ function SuccessContent() {
 
         {/* Action Buttons */}
         <div className="mt-8 flex flex-col gap-2.5">
-          <Link href="/dashboard/user/overview">
-            <Button
-              className="w-full bg-[#046A38] dark:bg-emerald-500 text-white dark:text-zinc-950 font-bold text-[10px] uppercase rounded-xl h-10 hover:opacity-95 transition-opacity cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
-            >
-              <span>Go to Dashboard</span>
-              <ArrowRight size={12} />
-            </Button>
-          </Link>
+          {searchParams.get("recipe_id") ? (
+            <Link href={`/recipes/${searchParams.get("recipe_id")}`}>
+              <Button
+                className="w-full bg-[#046A38] dark:bg-emerald-500 text-white dark:text-zinc-950 font-bold text-[10px] uppercase rounded-xl h-10 hover:opacity-95 transition-opacity cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <span>View Purchased Recipe</span>
+                <ArrowRight size={12} />
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/dashboard/user/overview">
+              <Button
+                className="w-full bg-[#046A38] dark:bg-emerald-500 text-white dark:text-zinc-950 font-bold text-[10px] uppercase rounded-xl h-10 hover:opacity-95 transition-opacity cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <span>Go to Dashboard</span>
+                <ArrowRight size={12} />
+              </Button>
+            </Link>
+          )}
 
-          <Link href="/recipes">
-            <Button
-              variant="bordered"
-              className="w-full border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-[10px] uppercase rounded-xl h-10 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
-            >
-              <span>Browse Recipes</span>
-              <ExternalLink size={12} />
-            </Button>
-          </Link>
+          {searchParams.get("recipe_id") ? (
+            <Link href="/dashboard/user/overview">
+              <Button
+                variant="bordered"
+                className="w-full border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-[10px] uppercase rounded-xl h-10 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
+              >
+                <span>Go to Dashboard</span>
+                <ExternalLink size={12} />
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/recipes">
+              <Button
+                variant="bordered"
+                className="w-full border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-[10px] uppercase rounded-xl h-10 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
+              >
+                <span>Browse Recipes</span>
+                <ExternalLink size={12} />
+              </Button>
+            </Link>
+          )}
         </div>
       </Card>
     </motion.div>

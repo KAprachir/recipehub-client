@@ -2,26 +2,53 @@
 @import "@heroui/styles";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fcf8fb;
+  --foreground: #1c1b1d;
+  
+  --primary: #006c49;
+  --on-primary: #ffffff;
+  --primary-container: #10b981;
+  --on-primary-container: #00422b;
+  
+  --surface: #ffffff;
+  --on-surface: #1c1b1d;
+  --surface-variant: #e5e1e4;
+  
+  --font-sans: var(--font-sans), Inter, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 }
 
-@theme inline {
+.dark {
+  --background: #09090b; /* Zinc-950 foundation */
+  --foreground: #f4f4f5; /* Zinc-100 foundation */
+  
+  --primary: #10b981;
+  --on-primary: #09090b;
+  --primary-container: #006c49;
+  --on-primary-container: #6ffbbe;
+  
+  --surface: #18181b; /* Zinc-900 elevated container */
+  --on-surface: #f4f4f5;
+  --surface-variant: #27272a; /* Zinc-800 */
+}
+
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-surface-variant: var(--surface-variant);
+  
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }

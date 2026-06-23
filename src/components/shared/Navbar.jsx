@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Button, Spinner } from "@heroui/react";
+import { Button, Spinner, Avatar } from "@heroui/react";
 import { LogOut, ChefHat, Menu, X } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
@@ -14,6 +14,17 @@ const Navbar = () => {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const user = session?.user;
+
+  const getAuthUrls = () => {
+    if (!pathname || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/payment")) {
+      return { loginUrl: "/login", registerUrl: "/register" };
+    }
+    return {
+      loginUrl: `/login?redirect=${encodeURIComponent(pathname)}`,
+      registerUrl: `/register?redirect=${encodeURIComponent(pathname)}`,
+    };
+  };
+  const { loginUrl, registerUrl } = getAuthUrls();
 
   if (pathname?.startsWith("/dashboard")) {
     return null;
@@ -95,10 +106,10 @@ const Navbar = () => {
               />
             </div>
           ) : user ? (
-            /* User Logged In Status (Buttons Side-by-Side) */
+            /* User Logged In Status (Responsive Header Actions) */
             <div className="flex items-center gap-3">
-              {/* Dashboard Button: Fixed by wrapping in Link */}
-              <Link href="/dashboard">
+              {/* Desktop Dashboard Link */}
+              <Link href="/dashboard" className="hidden sm:inline-flex">
                 <Button
                   variant="flat"
                   className="bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 font-semibold cursor-pointer"
@@ -107,22 +118,33 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {/* Logout is an action, not a link, so it stays as just a Button */}
+              {/* Desktop Logout Button */}
               <Button
                 color="danger"
                 variant="flat"
                 onPress={handleLogout}
                 startContent={<LogOut size={16} />}
-                className="font-semibold cursor-pointer"
+                className="font-semibold cursor-pointer hidden sm:inline-flex"
               >
                 Log Out
               </Button>
+
+              {/* Mobile Profile Link Icon */}
+              <Link href="/dashboard" className="sm:hidden flex items-center">
+                <Avatar
+                  src={
+                    user?.image ||
+                    "https://images.unsplash.com/photo-1577219491135-ce391730fb2c"
+                  }
+                  className="w-8 h-8 ring-2 ring-emerald-500 hover:scale-105 transition-transform"
+                />
+              </Link>
             </div>
           ) : (
             /* User Logged Out Status */
             <>
               {/* Login Button: Fixed by wrapping in Link */}
-              <Link href="/login" className="hidden sm:inline-flex">
+              <Link href={loginUrl} className="hidden sm:inline-flex">
                 <Button
                   variant="light"
                   className="text-neutral-700 dark:text-neutral-300 font-medium cursor-pointer"
@@ -132,7 +154,7 @@ const Navbar = () => {
               </Link>
 
               {/* Register Button: Fixed by wrapping in Link */}
-              <Link href="/register">
+              <Link href={registerUrl} className="hidden sm:inline-flex">
                 <Button className="bg-[#046A38] text-white font-medium shadow-sm hover:bg-[#03542C] transition-colors cursor-pointer">
                   Register
                 </Button>
@@ -163,17 +185,63 @@ const Navbar = () => {
             ))}
           </ul>
 
+          {/* User Details & Action Buttons for Mobile Drawer */}
+          {user && (
+            <div className="flex flex-col gap-2.5 pt-3.5 border-t border-neutral-100 dark:border-neutral-800">
+              <div className="flex items-center gap-3 p-2 bg-neutral-50 dark:bg-zinc-900 rounded-xl mb-1.5 border border-zinc-150 dark:border-zinc-800">
+                <Avatar
+                  src={
+                    user?.image ||
+                    "https://images.unsplash.com/photo-1577219491135-ce391730fb2c"
+                  }
+                  className="w-10 h-10 ring-2 ring-emerald-500 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold truncate text-neutral-800 dark:text-neutral-200">
+                    {user?.name || "Chef member"}
+                  </p>
+                  <p className="text-[10px] truncate text-neutral-500 font-medium">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/dashboard"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full"
+              >
+                <Button className="w-full bg-[#046A38] hover:bg-[#03542C] text-white font-medium cursor-pointer rounded-xl">
+                  Dashboard
+                </Button>
+              </Link>
+
+              <Button
+                color="danger"
+                variant="flat"
+                onPress={() => {
+                  setIsMenuOpen(false);
+                  handleLogout();
+                }}
+                startContent={<LogOut size={16} />}
+                className="w-full font-semibold cursor-pointer rounded-xl"
+              >
+                Log Out
+              </Button>
+            </div>
+          )}
+
           {!isPending && !user && (
             <div className="flex flex-col gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800">
               {/* Mobile Login Button: Fixed by wrapping in Link */}
               <Link
-                href="/login"
+                href={loginUrl}
                 onClick={() => setIsMenuOpen(false)}
                 className="w-full"
               >
                 <Button
                   variant="bordered"
-                  className="w-full text-neutral-700 dark:text-neutral-300 border-neutral-200 cursor-pointer"
+                  className="w-full text-neutral-700 dark:text-neutral-300 border-neutral-200 cursor-pointer rounded-xl"
                 >
                   Login
                 </Button>
@@ -181,11 +249,11 @@ const Navbar = () => {
 
               {/* Mobile Register Button: Fixed by wrapping in Link */}
               <Link
-                href="/register"
+                href={registerUrl}
                 onClick={() => setIsMenuOpen(false)}
                 className="w-full"
               >
-                <Button className="w-full bg-[#046A38] text-white hover:bg-[#03542C] cursor-pointer">
+                <Button className="w-full bg-[#046A38] text-white hover:bg-[#03542C] cursor-pointer rounded-xl">
                   Register
                 </Button>
               </Link>

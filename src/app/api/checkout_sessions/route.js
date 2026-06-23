@@ -72,8 +72,8 @@ export async function POST(req) {
     const session = await stripe.checkout.sessions.create({
       line_items: [lineItem],
       mode: 'payment',
-      success_url: `${origin}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/payment/cancel`,
+      success_url: `${origin}/payment/success?session_id={CHECKOUT_SESSION_ID}${recipeId ? `&recipe_id=${recipeId}` : ''}`,
+      cancel_url: `${origin}/payment/cancel${recipeId ? `?recipe_id=${recipeId}` : ''}`,
       metadata: {
         userId: user.id, // Pass user ID as metadata to verify and upgrade
         recipeId: recipeId || '',

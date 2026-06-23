@@ -4,10 +4,12 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Card, Button } from "@heroui/react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 
 import { X, HelpCircle, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
 
 function CancelContent() {
+  const searchParams = useSearchParams();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -86,7 +88,7 @@ function CancelContent() {
               Link to your payment page URL to restart the billing procedure.
               Example: href="/billing" or href="/upgrade"
           */}
-          <Link href="#" className="flex-1">
+          <Link href={searchParams.get("recipe_id") ? `/recipes/${searchParams.get("recipe_id")}` : "/recipes"} className="flex-1">
             <Button
               className="w-full bg-[#046A38] dark:bg-emerald-500 text-white dark:text-zinc-950 font-bold text-[10px] uppercase rounded-xl h-10 hover:opacity-95 transition-opacity cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
             >

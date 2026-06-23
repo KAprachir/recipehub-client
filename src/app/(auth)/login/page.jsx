@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@heroui/react";
 import { Mail, Lock, LogIn, ChefHat } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -16,6 +16,8 @@ export default function LoginPage() {
     rememberMe: false,
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -30,7 +32,7 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: window.location.origin + "/",
+        callbackURL: window.location.origin + redirectTo,
       });
     } catch (err) {
       console.error("Google Sign-In Error:", err);
@@ -60,7 +62,7 @@ export default function LoginPage() {
       }
 
       // 2. If successful, navigate and refresh the router to update the Navbar
-      router.push("/");
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       // 3. Catch unexpected network errors or crashes
@@ -211,12 +213,24 @@ export default function LoginPage() {
       <p className="mt-6 text-center text-xs text-neutral-500 dark:text-neutral-400">
         Don&apos;t have an account?{" "}
         <Link
-          href="/register"
+          href={redirectTo !== "/" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}
           className="text-[#046A38] font-bold hover:underline transition-all ml-1"
         >
           Register
         </Link>
       </p>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen w-full bg-linear-to-b from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

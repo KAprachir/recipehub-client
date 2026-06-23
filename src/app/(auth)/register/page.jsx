@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@heroui/react";
@@ -14,9 +14,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function RegisterPage() {
+function RegisterContent() {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,6 +27,8 @@ export default function RegisterPage() {
     password: "",
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -65,7 +67,7 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/");
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       console.error("Authentication registration failure:", err);
@@ -77,9 +79,15 @@ export default function RegisterPage() {
 
   // google signIn
   const googleSignIn = async () => {
-    const data = await authClient.signIn.social({
-      provider: "google",
-    });
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: window.location.origin + redirectTo,
+      });
+    } catch (err) {
+      console.error("Google Sign-In Error:", err);
+      setError("Failed to initiate Google login. Please try again.");
+    }
   };
 
   return (
@@ -301,7 +309,7 @@ export default function RegisterPage() {
             <p className="text-center text-xs text-neutral-500">
               Already have an account?{" "}
               <Link
-                href="/login"
+                href={redirectTo !== "/" ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"}
                 className="text-[#046A38] font-bold hover:underline transition-all"
               >
                 Login here
@@ -311,5 +319,17 @@ export default function RegisterPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen w-full bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <RegisterContent />
+    </Suspense>
   );
 }

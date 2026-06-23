@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Select, ListBox } from "@heroui/react";
+import { Filter, ChevronDown, ChevronUp } from "lucide-react";
 
 const CATEGORIES = [
   "Main Course",
@@ -36,6 +37,7 @@ export default function FilterSidebar({ currentFilters }) {
   const [cuisine, setCuisine] = useState(currentFilters.cuisine || "All Cuisines");
   const [difficulty, setDifficulty] = useState(currentFilters.difficulty || "");
   const [maxTime, setMaxTime] = useState(currentFilters.maxTime || 60);
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   // Sync state with URL params when they change (e.g. back navigation or external updates)
   useEffect(() => {
@@ -65,18 +67,35 @@ export default function FilterSidebar({ currentFilters }) {
   };
 
   return (
-    <div className="space-y-6 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-100 dark:border-zinc-900 sticky top-24">
-      <div className="flex items-center justify-between border-b pb-3">
-        <h3 className="font-bold text-sm tracking-wide uppercase text-zinc-500">
-          Filters
-        </h3>
+    <div className="space-y-4 lg:space-y-6 p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-100 dark:border-zinc-900 sticky top-24">
+      {/* Mobile Toggle Button */}
+      <div className="lg:hidden">
         <button
-          onClick={handleClearAll}
-          className="text-xs text-zinc-400 hover:text-emerald-600 transition-all font-semibold"
+          type="button"
+          onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+          className="w-full flex items-center justify-between py-2.5 px-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl font-bold text-xs uppercase tracking-wider text-zinc-700 dark:text-zinc-300 transition-all hover:bg-zinc-100 active:scale-[0.98] cursor-pointer"
         >
-          Clear All
+          <span className="flex items-center gap-2">
+            <Filter size={14} className="text-[#046A38] dark:text-emerald-500" />
+            <span>Recipe Filters</span>
+          </span>
+          {isMobileExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
       </div>
+
+      {/* Filter Options Wrapper */}
+      <div className={`${isMobileExpanded ? "block" : "hidden lg:block"} space-y-6`}>
+        <div className="flex items-center justify-between border-b pb-3 pt-2 lg:pt-0">
+          <h3 className="font-bold text-sm tracking-wide uppercase text-zinc-500">
+            Filters
+          </h3>
+          <button
+            onClick={handleClearAll}
+            className="text-xs text-zinc-400 hover:text-emerald-600 transition-all font-semibold cursor-pointer"
+          >
+            Clear All
+          </button>
+        </div>
 
       {/* Category Checkboxes */}
       <div className="space-y-2.5">
@@ -217,6 +236,7 @@ export default function FilterSidebar({ currentFilters }) {
           onTouchEnd={() => updateQueryParams("maxTime", maxTime)}
           className="w-full h-1 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-600"
         />
+      </div>
       </div>
     </div>
   );

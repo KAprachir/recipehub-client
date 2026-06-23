@@ -30,6 +30,22 @@ export default function RecipeDetailsClient({ recipe }) {
   // Check active user authentication state
   const { user } = useAuth();
 
+  const promptLogin = (actionText) => {
+    Swal.fire({
+      title: "Please Log In",
+      text: `You need to be logged in to ${actionText}.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#00693E",
+      confirmButtonText: "Log In",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/login?redirect=${encodeURIComponent(`/recipes/${recipe._id}`)}`;
+      }
+    });
+  };
+
   // Load user's favorite status on page mount or user auth state change
   useEffect(() => {
     if (user && recipe?._id) {
@@ -71,12 +87,7 @@ export default function RecipeDetailsClient({ recipe }) {
   const handleFavoriteToggle = async () => {
     // Restrict favoriting to logged-in users only
     if (!user) {
-      Swal.fire({
-        title: "Please Log In",
-        text: "You need to be logged in to favorite recipes.",
-        icon: "warning",
-        confirmButtonColor: "#00693E",
-      });
+      promptLogin("favorite recipes");
       return;
     }
 
@@ -116,12 +127,7 @@ export default function RecipeDetailsClient({ recipe }) {
   // Like Recipe Handler: Increments community like counter
   const handleLikeClick = async () => {
     if (!user) {
-      Swal.fire({
-        title: "Please Log In",
-        text: "You need to be logged in to like recipes.",
-        icon: "warning",
-        confirmButtonColor: "#00693E",
-      });
+      promptLogin("like recipes");
       return;
     }
 
@@ -150,12 +156,7 @@ export default function RecipeDetailsClient({ recipe }) {
   // Purchase Recipe Handler: Initiates Stripe Checkout session redirection
   const handlePurchase = async () => {
     if (!user) {
-      Swal.fire({
-        title: "Please Log In",
-        text: "You need to be logged in to purchase recipes.",
-        icon: "warning",
-        confirmButtonColor: "#00693E",
-      });
+      promptLogin("purchase recipes");
       return;
     }
 
@@ -207,12 +208,7 @@ export default function RecipeDetailsClient({ recipe }) {
   // Report Recipe Handler: Submits moderation ticket
   const handleReport = () => {
     if (!user) {
-      Swal.fire({
-        title: "Please Log In",
-        text: "You need to be logged in to report recipes.",
-        icon: "warning",
-        confirmButtonColor: "#00693E",
-      });
+      promptLogin("report recipes");
       return;
     }
 

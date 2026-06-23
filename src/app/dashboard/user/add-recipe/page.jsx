@@ -270,13 +270,13 @@ export default function AddRecipePage() {
               variant="bordered"
               value={recipeName}
               onChange={(e) => setRecipeName(e.target.value)}
-              isrequired="true"
+              isRequired
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* V3 COMPATIBLE SELECT: CATEGORY */}
               <div className="flex flex-col gap-1 w-full">
-                <Select value={category} onChange={setCategory} isrequired>
+                <Select value={category} onChange={setCategory} isRequired>
                   <Label className="text-xs font-semibold text-zinc-500">
                     Category
                   </Label>
@@ -298,7 +298,7 @@ export default function AddRecipePage() {
 
               {/* V3 COMPATIBLE SELECT: CUISINE */}
               <div className="flex flex-col gap-1 w-full">
-                <Select value={cuisine} onChange={setCuisine} isrequired>
+                <Select value={cuisine} onChange={setCuisine} isRequired>
                   <Label className="text-xs font-semibold text-zinc-500">
                     Cuisine
                   </Label>
@@ -346,10 +346,10 @@ export default function AddRecipePage() {
                 label="Prep Time (minutes)"
                 placeholder="30"
                 variant="bordered"
-                endcontent={<span className="text-xs text-zinc-400">min</span>}
+                endContent={<span className="text-xs text-zinc-400">min</span>}
                 value={prepTime}
                 onChange={(e) => setPrepTime(e.target.value)}
-                isrequired="true"
+                isRequired
               />
             </div>
           </Card>
@@ -428,7 +428,7 @@ export default function AddRecipePage() {
             <div className="flex gap-2 items-end">
               <TextArea
                 variant="bordered"
-                minrows={2}
+                minRows={2}
                 placeholder="Describe this step (e.g., Heat olive oil, sauté minced garlic...)"
                 value={newInstruction}
                 onChange={(e) => setNewInstruction(e.target.value)}
